@@ -1,97 +1,118 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Typography, Button, Box } from '@mui/material';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider, createTheme, CssBaseline, Box } from '@mui/material';
 import Login from './components/Login';
 import Navbar from './components/Navbar';
+import CaseForm from './components/CaseForm';
 import './styles/global.css';
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#4CAF50',
+    },
+    secondary: {
+      main: '#2196F3',
+    },
+  },
+  typography: {
+    fontFamily: '"Noto Sans TC", sans-serif',
+  },
+});
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const handleLogin = (username: string, password: string) => {
-    // 這裡之後會加入實際的登入驗證邏輯
-    if (username === 'admin' && password === 'admin') {
-      setIsLoggedIn(true);
-      // 儲存登入狀態到 localStorage
-      localStorage.setItem('isLoggedIn', 'true');
-      // 重新整理頁面
-      window.location.reload();
-    } else {
-      alert('帳號或密碼錯誤');
-    }
+  const handleLogin = (success: boolean) => {
+    setIsLoggedIn(success);
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
-    // 清除登入狀態
-    localStorage.removeItem('isLoggedIn');
-    // 重新整理頁面
-    window.location.reload();
   };
 
-  // 檢查是否已經登入
-  useEffect(() => {
-    const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    setIsLoggedIn(loggedIn);
-  }, []);
-
-  if (!isLoggedIn) {
-    return <Login onLogin={handleLogin} />;
-  }
-
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Navbar onLogout={handleLogout} />
-      <Box 
-        component="main" 
-        className="App" 
-        sx={{ 
-          flexGrow: 1,
-          pt: 8, // 為導航列留出空間
-        }}
-      >
-        <Container maxWidth="sm">
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Router>
+        <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+          {isLoggedIn && <Navbar onLogout={handleLogout} />}
           <Box
+            component="main"
             sx={{
-              my: 4,
-              p: 4,
-              borderRadius: 2,
-              background: 'rgba(255, 255, 255, 0.9)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-              backdropFilter: 'blur(20px)',
-              transition: 'all 0.3s ease-in-out',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              '&:hover': {
-                transform: 'translateY(-5px)',
-                background: 'rgba(255, 255, 255, 0.95)',
-              },
+              flexGrow: 1,
+              p: 3,
+              mt: isLoggedIn ? 8 : 0,
+              background: 'linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%)',
+              minHeight: '100vh',
             }}
           >
-            <Typography variant="h4" component="h1" gutterBottom sx={{ color: '#2E7D32', fontWeight: 'bold' }}>
-              NPO 個案管理系統
-            </Typography>
-            <Typography variant="body1" gutterBottom sx={{ color: '#388E3C' }}>
-              歡迎使用 NPO 個案管理系統，讓我們一起為社會服務
-            </Typography>
-            <Box sx={{ mt: 3 }}>
-              <Button
-                variant="contained"
-                sx={{
-                  mr: 2,
-                  backgroundColor: '#4CAF50',
-                  transition: 'all 0.3s ease-in-out',
-                  '&:hover': {
-                    backgroundColor: '#388E3C',
-                    transform: 'translateY(-2px)',
-                  },
-                }}
-              >
-                進入系統
-              </Button>
-            </Box>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  isLoggedIn ? (
+                    <Navigate to="/dashboard" replace />
+                  ) : (
+                    <Login onLogin={handleLogin} />
+                  )
+                }
+              />
+              <Route
+                path="/dashboard"
+                element={
+                  isLoggedIn ? (
+                    <div>儀表板頁面</div>
+                  ) : (
+                    <Navigate to="/" replace />
+                  )
+                }
+              />
+              <Route
+                path="/cases"
+                element={
+                  isLoggedIn ? (
+                    <div>個案管理頁面</div>
+                  ) : (
+                    <Navigate to="/" replace />
+                  )
+                }
+              />
+              <Route
+                path="/cases/new"
+                element={
+                  isLoggedIn ? (
+                    <CaseForm />
+                  ) : (
+                    <Navigate to="/" replace />
+                  )
+                }
+              />
+              <Route
+                path="/reports"
+                element={
+                  isLoggedIn ? (
+                    <div>報表分析頁面</div>
+                  ) : (
+                    <Navigate to="/" replace />
+                  )
+                }
+              />
+              <Route
+                path="/settings"
+                element={
+                  isLoggedIn ? (
+                    <div>系統設定頁面</div>
+                  ) : (
+                    <Navigate to="/" replace />
+                  )
+                }
+              />
+            </Routes>
           </Box>
-        </Container>
-      </Box>
-    </Box>
+        </Box>
+      </Router>
+    </ThemeProvider>
   );
 }
 

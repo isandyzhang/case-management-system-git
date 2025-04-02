@@ -11,6 +11,15 @@ import {
   Avatar,
   useScrollTrigger,
   Slide,
+  useTheme,
+  useMediaQuery,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Badge,
+  Tooltip,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -21,17 +30,23 @@ import {
   Assessment,
   Settings,
   Add as AddIcon,
+  Notifications,
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
 interface NavbarProps {
   onLogout: () => void;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [mobileAnchorEl, setMobileAnchorEl] = useState<null | HTMLElement>(null);
-  const [notificationsAnchorEl, setNotificationsAnchorEl] = useState<null | HTMLElement>(null);
+  const [notificationsAnchor, setNotificationsAnchor] = useState<null | HTMLElement>(null);
+  const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
   const [scrolled, setScrolled] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const navigate = useNavigate();
 
   const trigger = useScrollTrigger({
     threshold: 100,
@@ -39,28 +54,45 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
+      setScrolled(window.scrollY > 20);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
+  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleMobileMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setMobileAnchorEl(event.currentTarget);
-  };
-
-  const handleNotifications = (event: React.MouseEvent<HTMLElement>) => {
-    setNotificationsAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
+  const handleMenuClose = () => {
     setAnchorEl(null);
-    setMobileAnchorEl(null);
-    setNotificationsAnchorEl(null);
+  };
+
+  const handleNotificationsClick = (event: React.MouseEvent<HTMLElement>) => {
+    setNotificationsAnchor(event.currentTarget);
+  };
+
+  const handleNotificationsClose = () => {
+    setNotificationsAnchor(null);
+  };
+
+  const handleUserMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    setUserMenuAnchor(event.currentTarget);
+  };
+
+  const handleUserMenuClose = () => {
+    setUserMenuAnchor(null);
+  };
+
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    if (isMobile) {
+      setMobileOpen(false);
+    }
   };
 
   const menuItems = [
@@ -71,161 +103,148 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
     { text: '系統設定', icon: <Settings />, path: '/settings' },
   ];
 
+  const drawer = (
+    <Box sx={{ width: 250 }}>
+      <List>
+        {menuItems.map((item) => (
+          <ListItem
+            button
+            key={item.text}
+            onClick={() => handleNavigation(item.path)}
+          >
+            <ListItemIcon>{item.icon}</ListItemIcon>
+            <ListItemText primary={item.text} />
+          </ListItem>
+        ))}
+      </List>
+    </Box>
+  );
+
   return (
     <>
       <Slide appear={false} direction="down" in={!trigger}>
         <AppBar 
           position="fixed" 
           sx={{ 
-            background: 'rgba(255, 255, 255, 0.95)',
+            background: scrolled
+              ? 'rgba(255, 255, 255, 0.9)'
+              : 'rgba(255, 255, 255, 0.7)',
             backdropFilter: 'blur(10px)',
             boxShadow: scrolled ? '0 2px 10px rgba(0, 0, 0, 0.1)' : 'none',
-            borderBottom: '1px solid rgba(76, 175, 80, 0.1)',
+            transition: 'all 0.3s ease',
             fontFamily: '"Noto Sans TC", sans-serif',
           }}
         >
           <Toolbar>
-            <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="menu"
-              sx={{ mr: 2, display: { sm: 'none' } }}
-              onClick={handleMobileMenu}
-            >
-              <MenuIcon sx={{ color: '#4CAF50' }} />
-            </IconButton>
+            {isMobile && (
+              <IconButton
+                color="primary"
+                edge="start"
+                onClick={handleDrawerToggle}
+                sx={{ mr: 2 }}
+              >
+                <MenuIcon />
+              </IconButton>
+            )}
 
             <Typography
-              variant="h5"
+              variant="h6"
               component="div"
-              sx={{ 
-                flexGrow: 1, 
-                color: '#2E7D32',
+              sx={{
+                flexGrow: 1,
+                color: 'primary.main',
                 fontWeight: 'bold',
-                display: { xs: 'none', sm: 'block' },
-                fontSize: '1.5rem',
-                letterSpacing: '0.5px',
+                cursor: 'pointer',
               }}
+              onClick={() => handleNavigation('/')}
             >
-              NPO 個案管理系統
+              NPO個案管理系統
             </Typography>
 
-            <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 2 }}>
-              {menuItems.map((item) => (
-                <Button
-                  key={item.text}
-                  startIcon={item.icon}
+            {!isMobile && (
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                {menuItems.map((item) => (
+                  <Button
+                    key={item.text}
+                    color="primary"
+                    startIcon={item.icon}
+                    onClick={() => handleNavigation(item.path)}
+                    sx={{
+                      '&:hover': {
+                        backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                      },
+                    }}
+                  >
+                    {item.text}
+                  </Button>
+                ))}
+              </Box>
+            )}
+
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, ml: 2 }}>
+              <Tooltip title="通知">
+                <IconButton
+                  color="primary"
+                  onClick={handleNotificationsClick}
                   sx={{
-                    color: '#4CAF50',
-                    fontSize: '1.1rem',
                     '&:hover': {
-                      backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                      backgroundColor: 'rgba(25, 118, 210, 0.08)',
                     },
                   }}
                 >
-                  {item.text}
-                </Button>
-              ))}
-            </Box>
+                  <Badge badgeContent={3} color="error">
+                    <Notifications />
+                  </Badge>
+                </IconButton>
+              </Tooltip>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <IconButton
-                size="large"
-                aria-label="notifications"
-                onClick={handleNotifications}
-                sx={{ color: '#4CAF50' }}
-              >
-                <NotificationsIcon />
-              </IconButton>
-              <IconButton
-                size="large"
-                aria-label="account"
-                onClick={handleMenu}
-                sx={{ color: '#4CAF50' }}
-              >
-                <AccountCircle />
-              </IconButton>
+              <Tooltip title="用戶選單">
+                <IconButton
+                  onClick={handleUserMenuClick}
+                  sx={{
+                    '&:hover': {
+                      backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                    },
+                  }}
+                >
+                  <Avatar sx={{ width: 32, height: 32 }}>U</Avatar>
+                </IconButton>
+              </Tooltip>
             </Box>
           </Toolbar>
         </AppBar>
       </Slide>
 
-      {/* 手機版選單 */}
-      <Menu
-        anchorEl={mobileAnchorEl}
-        open={Boolean(mobileAnchorEl)}
-        onClose={handleClose}
-        PaperProps={{
-          sx: {
-            mt: 1.5,
-            borderRadius: 2,
-            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-            fontFamily: '"Noto Sans TC", sans-serif',
-          },
+      <Drawer
+        variant="temporary"
+        anchor="left"
+        open={mobileOpen}
+        onClose={handleDrawerToggle}
+        ModalProps={{
+          keepMounted: true,
         }}
       >
-        {menuItems.map((item) => (
-          <MenuItem key={item.text} onClick={handleClose}>
-            {item.icon}
-            <Typography sx={{ ml: 1, fontSize: '1.1rem' }}>{item.text}</Typography>
-          </MenuItem>
-        ))}
+        {drawer}
+      </Drawer>
+
+      <Menu
+        anchorEl={notificationsAnchor}
+        open={Boolean(notificationsAnchor)}
+        onClose={handleNotificationsClose}
+      >
+        <MenuItem onClick={handleNotificationsClose}>新通知 1</MenuItem>
+        <MenuItem onClick={handleNotificationsClose}>新通知 2</MenuItem>
+        <MenuItem onClick={handleNotificationsClose}>新通知 3</MenuItem>
       </Menu>
 
-      {/* 通知選單 */}
       <Menu
-        anchorEl={notificationsAnchorEl}
-        open={Boolean(notificationsAnchorEl)}
-        onClose={handleClose}
-        PaperProps={{
-          sx: {
-            mt: 1.5,
-            borderRadius: 2,
-            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-            fontFamily: '"Noto Sans TC", sans-serif',
-          },
-        }}
+        anchorEl={userMenuAnchor}
+        open={Boolean(userMenuAnchor)}
+        onClose={handleUserMenuClose}
       >
-        <MenuItem onClick={handleClose}>
-          <Typography sx={{ fontSize: '1.1rem' }}>您有 3 個新的通知</Typography>
-        </MenuItem>
-        <MenuItem onClick={handleClose}>
-          <Typography sx={{ fontSize: '1.1rem' }}>系統更新提醒</Typography>
-        </MenuItem>
-      </Menu>
-
-      {/* 用戶選單 */}
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleClose}
-        PaperProps={{
-          sx: {
-            mt: 1.5,
-            borderRadius: 2,
-            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-            fontFamily: '"Noto Sans TC", sans-serif',
-          },
-        }}
-      >
-        <MenuItem onClick={handleClose}>
-          <Avatar sx={{ mr: 1, bgcolor: '#4CAF50' }}>A</Avatar>
-          <Box>
-            <Typography variant="subtitle2" sx={{ fontSize: '1.1rem' }}>管理員</Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.9rem' }}>
-              admin@example.com
-            </Typography>
-          </Box>
-        </MenuItem>
-        <MenuItem onClick={handleClose}>
-          <Typography sx={{ fontSize: '1.1rem' }}>個人資料</Typography>
-        </MenuItem>
-        <MenuItem onClick={handleClose}>
-          <Typography sx={{ fontSize: '1.1rem' }}>系統設定</Typography>
-        </MenuItem>
-        <MenuItem onClick={onLogout}>
-          <Typography sx={{ fontSize: '1.1rem' }}>登出</Typography>
-        </MenuItem>
+        <MenuItem onClick={handleUserMenuClose}>個人資料</MenuItem>
+        <MenuItem onClick={handleUserMenuClose}>系統設定</MenuItem>
+        <MenuItem onClick={onLogout}>登出</MenuItem>
       </Menu>
     </>
   );

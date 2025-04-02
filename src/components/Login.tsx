@@ -8,18 +8,24 @@ import {
   Paper,
   Alert,
   Avatar,
+  InputAdornment,
+  IconButton,
 } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import '../styles/global.css';
+import { useNavigate } from 'react-router-dom';
 
 interface LoginProps {
-  onLogin: (username: string, password: string) => void;
+  onLogin: (success: boolean) => void;
 }
 
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +33,12 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       setError('請輸入帳號和密碼');
       return;
     }
-    onLogin(username, password);
+    if (username === 'admin' && password === 'admin') {
+      onLogin(true);
+      navigate('/dashboard');
+    } else {
+      setError('帳號或密碼錯誤');
+    }
   };
 
   return (
@@ -100,11 +111,23 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               fullWidth
               name="password"
               label="密碼"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               id="password"
               autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   '&:hover fieldset': {
