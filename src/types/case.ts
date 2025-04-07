@@ -1,55 +1,107 @@
-export interface ICase {
-  id?: string;
+export interface ICase extends ICaseFormData {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  createdBy: string;
+  updatedBy: string;
+  status: 'active' | 'inactive' | 'archived';
+  birthYear: string;
+  birthMonth: string;
+  birthDay: string;
+  school: string;
+  contactPerson: {
+    name: string;
+    phone: string;
+    phoneAreaCode: string;
+    otherPhoneAreaCode: string;
+    mobile: string;
+    relation: string;
+    otherRelation: string;
+  };
+}
+
+export interface ICaseFormData {
   name: string;
   gender: 'male' | 'female';
-  birthDate: Date | null;
+  birthDate: Date;
+  birthYear: string;
+  birthMonth: string;
+  birthDay: string;
   idNumber: string;
-  address: string;
+  school: string;
+  schoolType: 'elementary' | 'junior' | 'high' | '';
+  address: {
+    city: 'taipei' | 'newTaipei' | 'other';
+    district: string;
+    otherCity?: string;
+    otherDistrict?: string;
+    detail: string;
+  };
+  contactPerson: {
+    name: string;
+    phone: string;
+    phoneAreaCode: string;
+    otherPhoneAreaCode?: string;
+    mobile: string;
+    relation: string;
+    otherRelation?: string;
+  };
   phone: string;
-  contactPerson: string;
-  contactRelation: string;
-  contactPhone: string;
+  email: string;
   specialStatus: {
     none: boolean;
     lowIncome: boolean;
+    lowIncomeCardNumber: string;
     middleLowIncome: boolean;
     nearPoverty: boolean;
     majorIllness: boolean;
-  };
-  icfCode: string;
-  originalResidentStatus: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
-
-export interface ICaseFormData extends Omit<ICase, 'id' | 'createdAt' | 'updatedAt'> {
-  // 家庭狀況
-  familyMembers: {
-    father: boolean;
-    mother: boolean;
-    brothers: number;
-    sisters: number;
-    siblings: number;
-    grandfather: boolean;
-    grandmother: boolean;
-    paternalGrandfather: boolean;
-    paternalGrandmother: boolean;
+    majorIllnessDescription: string;
+    disability: boolean;
+    icfCode: string;
+    indigenous: boolean;
+    indigenousType: string;
     other: string;
   };
-  
-  // 評估資料
-  assessmentData: {
-    healthStatus: string;
-    mentalStatus: string;
-    socialSupport: string;
-    economicStatus: string;
+  familyMembers: {
+    father: boolean;
+    fatherNationality?: string;
+    fatherOtherNationality?: string;
+    mother: boolean;
+    motherNationality?: string;
+    motherOtherNationality?: string;
+    brothers: number;
+    sisters: number;
+    others: string;
   };
-  
-  // 其他資訊
-  additionalInfo: {
-    notes: string;
-    attachments: string[];
+  familyStructure: {
+    type: string;
+    otherDescription: string;
   };
+  residence: {
+    type: string;
+    otherDescription: string;
+  };
+  primaryCaregiver: {
+    relationship: string;
+    age: number;
+    occupation: string;
+    education: string;
+  };
+  caseSource: {
+    source: string;
+    referralSource: string;
+    otherSource: string;
+  };
+  helpExperience: {
+    hasExperience: boolean;
+    description: string;
+  };
+  interview: {
+    date: string;
+    interviewer: string;
+    content: string;
+  };
+  remarks: string;
 }
 
 export interface ICaseResponse {

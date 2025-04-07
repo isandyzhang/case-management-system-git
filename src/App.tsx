@@ -21,7 +21,8 @@ const theme = createTheme({
 });
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // 暫時設置為已登入狀態
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
 
   const handleLogin = (success: boolean) => {
     setIsLoggedIn(success);
@@ -48,66 +49,8 @@ function App() {
             }}
           >
             <Routes>
-              <Route
-                path="/"
-                element={
-                  isLoggedIn ? (
-                    <Navigate to="/dashboard" replace />
-                  ) : (
-                    <Login onLogin={handleLogin} />
-                  )
-                }
-              />
-              <Route
-                path="/dashboard"
-                element={
-                  isLoggedIn ? (
-                    <div>儀表板頁面</div>
-                  ) : (
-                    <Navigate to="/" replace />
-                  )
-                }
-              />
-              <Route
-                path="/cases"
-                element={
-                  isLoggedIn ? (
-                    <div>個案管理頁面</div>
-                  ) : (
-                    <Navigate to="/" replace />
-                  )
-                }
-              />
-              <Route
-                path="/cases/new"
-                element={
-                  isLoggedIn ? (
-                    <CaseForm />
-                  ) : (
-                    <Navigate to="/" replace />
-                  )
-                }
-              />
-              <Route
-                path="/reports"
-                element={
-                  isLoggedIn ? (
-                    <div>報表分析頁面</div>
-                  ) : (
-                    <Navigate to="/" replace />
-                  )
-                }
-              />
-              <Route
-                path="/settings"
-                element={
-                  isLoggedIn ? (
-                    <div>系統設定頁面</div>
-                  ) : (
-                    <Navigate to="/" replace />
-                  )
-                }
-              />
+              <Route path="/" element={<Navigate to="/cases/new" replace />} />
+              <Route path="/cases/new" element={<CaseForm />} />
             </Routes>
           </Box>
         </Box>
