@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ThemeProvider, createTheme, CssBaseline, Box } from '@mui/material';
 import Login from './components/Login';
 import Navbar from './components/Navbar';
-import CaseForm from './components/CaseForm';
+import StepperForm from './components/StepperForm';
 import './styles/global.css';
 
 const theme = createTheme({
@@ -50,7 +50,7 @@ function App() {
           >
             <Routes>
               <Route path="/" element={<Navigate to="/cases/new" replace />} />
-              <Route path="/cases/new" element={<CaseForm />} />
+              <Route path="/cases/new" element={<StepperForm />} />
             </Routes>
           </Box>
         </Box>

@@ -636,7 +636,7 @@ const CaseForm: React.FC = () => {
   return (
     <Container maxWidth="lg">
       <Fade in={true} timeout={1000}>
-        <StyledPaper>
+        <Box>
           <Typography variant="h4" gutterBottom>
             認養童基本資訊
           </Typography>
@@ -1206,7 +1206,7 @@ const CaseForm: React.FC = () => {
               </Zoom>
             </Box>
           </form>
-        </StyledPaper>
+        </Box>
       </Fade>
     </Container>
   );
