@@ -5,6 +5,8 @@ import Navbar from './components/Navbar';
 import StepperForm from './components/StepperForm';
 import Dashboard from './components/Dashboard';
 import CaseManagement from './components/CaseManagement';
+import CaseEdit from './components/CaseEdit';
+import ActivityManagement from './components/ActivityManagement';
 
 const theme = createTheme({
   palette: {
@@ -90,16 +92,12 @@ const theme = createTheme({
   },
 });
 
-const App: React.FC = () => {
+function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <Box sx={{ 
-          display: 'flex',
-          minHeight: '100vh',
-          bgcolor: '#f5f7fa',
-        }}>
+        <Box sx={{ display: 'flex', bgcolor: '#f5f7fa', minHeight: '100vh' }}>
           <Navbar onLogout={() => {}} />
           <Box
             component="main"
@@ -114,17 +112,18 @@ const App: React.FC = () => {
             }}
           >
             <Routes>
-              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/" element={<Dashboard />} />
               <Route path="/cases" element={<CaseManagement />} />
               <Route path="/new-case" element={<StepperForm />} />
-              <Route path="/analysis" element={<Dashboard />} />
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/cases/new" element={<CaseEdit />} />
+              <Route path="/cases/:id" element={<CaseEdit />} />
+              <Route path="/activities" element={<ActivityManagement />} />
             </Routes>
           </Box>
         </Box>
       </Router>
     </ThemeProvider>
   );
-};
+}
 
 export default App;

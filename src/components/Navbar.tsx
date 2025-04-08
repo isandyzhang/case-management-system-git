@@ -18,6 +18,7 @@ import {
   Add,
   Assessment,
   ExitToApp,
+  Event as EventIcon,
 } from '@mui/icons-material';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -33,10 +34,10 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
   const location = useLocation();
 
   const menuItems = [
-    { text: '儀表板', icon: <Dashboard />, path: '/dashboard' },
-    { text: '個案列表', icon: <People />, path: '/cases' },
+    { text: '儀表板', icon: <Dashboard />, path: '/' },
+    { text: '個案管理', icon: <People />, path: '/cases' },
     { text: '新增個案', icon: <Add />, path: '/new-case' },
-    { text: '數據分析', icon: <Assessment />, path: '/analysis' },
+    { text: '活動管理', icon: <EventIcon />, path: '/activities' },
   ];
 
   return (

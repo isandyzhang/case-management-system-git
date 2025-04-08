@@ -590,9 +590,6 @@ const CaseForm: React.FC<CaseFormProps> = ({ formData, onFormDataChange }) => {
     <Container maxWidth="lg">
       <Fade in={true} timeout={1000}>
         <Box>
-          <Typography variant="h4" gutterBottom>
-            認養童基本資訊
-          </Typography>
           <form onSubmit={handleSubmit}>
             <Box sx={{ mt: 3 }}>
               <Grow in={true} timeout={1000}>
