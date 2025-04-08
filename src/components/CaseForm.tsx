@@ -184,57 +184,12 @@ interface ICaseFormData {
   avatar?: string;
 }
 
-const CaseForm: React.FC = () => {
-  const [formData, setFormData] = useState<ICaseFormData>({
-    id: '',
-    name: '',
-    gender: 'male',
-    birthDate: new Date().toISOString().split('T')[0],
-    birthYear: '',
-    birthMonth: '',
-    birthDay: '',
-    idNumber: '',
-    phone: '',
-    email: '',
-    address: {
-      city: 'taipei',
-      district: '',
-      otherCity: '',
-      otherDistrict: '',
-      detail: ''
-    },
-    contactPerson: {
-      name: '',
-      relation: 'father',
-      otherRelation: '',
-      phone: '',
-      phoneAreaCode: '02',
-      otherPhoneAreaCode: '',
-      mobile: ''
-    },
-    specialStatus: {
-      none: true,
-      lowIncome: false,
-      lowIncomeCardNumber: '',
-      middleLowIncome: false,
-      nearPoverty: false,
-      majorIllness: false,
-      majorIllnessDescription: '',
-      disability: false,
-      icfCode: '',
-      indigenous: false,
-      indigenousType: '',
-      other: ''
-    },
-    schoolType: '',
-    school: '',
-    schoolCity: 'taipei',
-    schoolDistrict: '',
-    createdAt: '',
-    updatedAt: '',
-    avatar: '',
-  });
+interface CaseFormProps {
+  formData: ICaseFormData;
+  onFormDataChange: (newData: Partial<ICaseFormData>) => void;
+}
 
+const CaseForm: React.FC<CaseFormProps> = ({ formData, onFormDataChange }) => {
   const [customSchools, setCustomSchools] = useState<School[]>([]);
   const [newSchoolInput, setNewSchoolInput] = useState('');
   const [previewImage, setPreviewImage] = useState<string>('');
@@ -244,17 +199,14 @@ const CaseForm: React.FC = () => {
     const fieldNames = name.split('.');
     
     if (fieldNames.length === 1) {
-      setFormData(prev => ({
-        ...prev,
+      onFormDataChange({
         [name]: type === 'checkbox' ? checked : value
-      }));
+      } as Partial<ICaseFormData>);
     } else if (fieldNames.length === 2) {
       const [parent, child] = fieldNames;
       if (parent === 'specialStatus') {
         if (child === 'none' && checked) {
-          // 如果選擇"無"，則清空其他選項
-          setFormData(prev => ({
-            ...prev,
+          onFormDataChange({
             specialStatus: {
               none: true,
               lowIncome: false,
@@ -269,94 +221,93 @@ const CaseForm: React.FC = () => {
               indigenousType: '',
               other: ''
             }
-          }));
+          });
         } else if (checked) {
-          // 如果選擇其他選項，則取消"無"的選項
-          setFormData(prev => ({
-            ...prev,
+          onFormDataChange({
             specialStatus: {
-              ...prev.specialStatus,
+              ...formData.specialStatus,
               none: false,
               [child]: checked
             }
-          }));
+          });
         } else {
-          setFormData(prev => ({
-            ...prev,
+          onFormDataChange({
             specialStatus: {
-              ...prev.specialStatus,
+              ...formData.specialStatus,
               [child]: checked
             }
-          }));
+          });
         }
       } else {
-        setFormData(prev => ({
-          ...prev,
-          [parent]: {
-            ...(prev[parent as keyof ICaseFormData] as Record<string, any>),
+        const parentKey = parent as keyof ICaseFormData;
+        onFormDataChange({
+          [parentKey]: {
+            ...(formData[parentKey] as Record<string, any>),
             [child]: type === 'checkbox' ? checked : value
           }
-        }));
+        });
       }
     } else if (fieldNames.length === 3) {
       const [parent, child, grandChild] = fieldNames;
-      setFormData(prev => {
-        const parentObj = prev[parent as keyof ICaseFormData] as Record<string, any>;
-        const childObj = parentObj[child] as Record<string, any>;
-        return {
-          ...prev,
-          [parent]: {
-            ...parentObj,
-            [child]: {
-              ...childObj,
-              [grandChild]: type === 'checkbox' ? checked : value
-            }
+      const parentKey = parent as keyof ICaseFormData;
+      onFormDataChange({
+        [parentKey]: {
+          ...(formData[parentKey] as Record<string, any>),
+          [child]: {
+            ...((formData[parentKey] as Record<string, any>)[child] as Record<string, any>),
+            [grandChild]: type === 'checkbox' ? checked : value
           }
-        };
+        }
       });
     }
   };
 
   const handleSelectChange = (e: SelectChangeEvent<string>) => {
     const { name, value } = e.target;
+    const [mainKey, subKey] = name.split('.');
 
-    setFormData((prev) => {
-      const [mainKey, subKey] = name.split('.');
-      let updated: ICaseFormData;
+    if (subKey) {
+      onFormDataChange({
+        [mainKey]: {
+          ...(formData[mainKey as keyof ICaseFormData] as Record<string, any>),
+          [subKey]: value,
+        },
+      });
+    } else {
+      onFormDataChange({
+        [name]: value,
+      });
+    }
 
-      if (subKey) {
-        updated = {
-          ...prev,
-          [mainKey]: {
-            ...(prev[mainKey as keyof ICaseFormData] as Record<string, any>),
-            [subKey]: value,
-          },
-        } as ICaseFormData;
+    if (name === 'address.city') {
+      if (value === 'taipei' || value === 'newTaipei') {
+        onFormDataChange({
+          address: {
+            ...formData.address,
+            district: districtMap[value as keyof typeof districtMap][0],
+            otherCity: '',
+            otherDistrict: ''
+          }
+        });
       } else {
-        updated = {
-          ...prev,
-          [name]: value,
-        } as ICaseFormData;
+        onFormDataChange({
+          address: {
+            ...formData.address,
+            district: ''
+          }
+        });
       }
-
-      if (name === 'address.city') {
-        if (value === 'taipei' || value === 'newTaipei') {
-          updated.address.district = districtMap[value as keyof typeof districtMap][0];
-          updated.address.otherCity = '';
-          updated.address.otherDistrict = '';
-        } else {
-          updated.address.district = '';
-        }
-      } else if (name === 'schoolCity') {
-        if (value === 'taipei' || value === 'newTaipei') {
-          updated.schoolDistrict = districtMap[value as keyof typeof districtMap][0];
-        } else {
-          updated.schoolDistrict = '';
-        }
+    } else if (name === 'schoolCity') {
+      if (value === 'taipei' || value === 'newTaipei') {
+        onFormDataChange({
+          schoolDistrict: districtMap[value as keyof typeof districtMap][0]
+        });
+      } else {
+        onFormDataChange({
+          schoolDistrict: ''
+        });
       }
-
-      return updated;
-    });
+    }
   };
 
   const handleDateChange = (date: Date | null) => {
@@ -366,13 +317,12 @@ const CaseForm: React.FC = () => {
       const day = date.getDate().toString().padStart(2, '0');
       const dateString = date.toISOString().split('T')[0];
 
-      setFormData(prev => ({
-        ...prev,
+      onFormDataChange({
         birthDate: dateString,
         birthYear: year,
         birthMonth: month,
         birthDay: day
-      }));
+      });
     }
   };
 
@@ -403,7 +353,7 @@ const CaseForm: React.FC = () => {
         // 成功提示
         alert('資料已成功儲存！');
         // 重置表單
-        setFormData({
+        onFormDataChange({
           id: '',
           name: '',
           gender: 'male',
@@ -542,7 +492,7 @@ const CaseForm: React.FC = () => {
                 ...caseData.specialStatus
               }
             };
-            setFormData(formattedData);
+            onFormDataChange(formattedData);
           }
         } catch (error) {
           console.error('Error loading case data:', error);
@@ -562,8 +512,11 @@ const CaseForm: React.FC = () => {
         type: formData.schoolType as 'elementary' | 'junior' | 'high',
         district: formData.schoolDistrict
       };
+      onFormDataChange({
+        school: newSchool.value,
+        schoolDistrict: newSchool.district
+      });
       setCustomSchools(prev => [...prev, newSchool]);
-      setFormData(prev => ({ ...prev, school: newSchool.value }));
       setNewSchoolInput('');
     }
   };
@@ -622,7 +575,7 @@ const CaseForm: React.FC = () => {
       reader.onloadend = () => {
         const base64String = reader.result as string;
         setPreviewImage(base64String);
-        setFormData(prev => ({ ...prev, avatar: base64String }));
+        onFormDataChange({ avatar: base64String });
       };
       reader.readAsDataURL(file);
     }
@@ -630,7 +583,7 @@ const CaseForm: React.FC = () => {
 
   const handleDeleteImage = () => {
     setPreviewImage('');
-    setFormData(prev => ({ ...prev, avatar: '' }));
+    onFormDataChange({ avatar: '' });
   };
 
   return (
