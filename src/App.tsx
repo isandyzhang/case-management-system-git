@@ -1,62 +1,130 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme, CssBaseline, Box } from '@mui/material';
-import Login from './components/Login';
 import Navbar from './components/Navbar';
 import StepperForm from './components/StepperForm';
-import './styles/global.css';
+import Dashboard from './components/Dashboard';
+import CaseManagement from './components/CaseManagement';
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#4CAF50',
+      main: '#2e7d32',
+      light: '#4caf50',
+      dark: '#1b5e20',
     },
     secondary: {
-      main: '#2196F3',
+      main: '#66bb6a',
+    },
+    background: {
+      default: '#f5f7fa',
+      paper: '#ffffff',
     },
   },
   typography: {
     fontFamily: '"Noto Sans TC", sans-serif',
   },
+  components: {
+    MuiDrawer: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: '#1e1e1e',
+          color: 'white',
+          borderRight: 'none',
+          boxShadow: 'none',
+          position: 'fixed',
+          height: '100%',
+          '&::-webkit-scrollbar': {
+            width: '6px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'transparent',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: 'rgba(255,255,255,0.2)',
+            borderRadius: '3px',
+          },
+          '&::-webkit-scrollbar-thumb:hover': {
+            background: 'rgba(255,255,255,0.3)',
+          },
+        },
+      },
+    },
+    MuiListItem: {
+      styleOverrides: {
+        root: {
+          borderRadius: '12px',
+          marginBottom: '8px',
+          padding: '10px 16px',
+          transition: 'all 0.2s',
+          '&.Mui-selected': {
+            backgroundColor: 'rgba(255,255,255,0.1)',
+            '&:hover': {
+              backgroundColor: 'rgba(255,255,255,0.15)',
+            },
+          },
+          '&:hover': {
+            backgroundColor: 'rgba(255,255,255,0.05)',
+          },
+        },
+      },
+    },
+    MuiListItemIcon: {
+      styleOverrides: {
+        root: {
+          minWidth: '40px',
+          color: 'inherit',
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundImage: 'none',
+          backgroundColor: '#ffffff',
+          borderRadius: '12px',
+          boxShadow: '0 2px 12px 0 rgba(0,0,0,0.05)',
+        },
+      },
+    },
+  },
 });
 
-function App() {
-  // 暫時設置為已登入狀態
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
-
-  const handleLogin = (success: boolean) => {
-    setIsLoggedIn(success);
-  };
-
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-  };
-
+const App: React.FC = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-          {isLoggedIn && <Navbar onLogout={handleLogout} />}
+        <Box sx={{ 
+          display: 'flex',
+          minHeight: '100vh',
+          bgcolor: '#f5f7fa',
+        }}>
+          <Navbar onLogout={() => {}} />
           <Box
             component="main"
             sx={{
               flexGrow: 1,
+              height: '100vh',
+              overflow: 'auto',
               p: 3,
-              mt: isLoggedIn ? 8 : 0,
-              background: 'linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%)',
-              minHeight: '100vh',
+              pl: '50px',
+              boxSizing: 'border-box',
+              bgcolor: '#f5f7fa',
             }}
           >
             <Routes>
-              <Route path="/" element={<Navigate to="/cases/new" replace />} />
-              <Route path="/cases/new" element={<StepperForm />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/cases" element={<CaseManagement />} />
+              <Route path="/new-case" element={<StepperForm />} />
+              <Route path="/analysis" element={<Dashboard />} />
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
             </Routes>
           </Box>
         </Box>
       </Router>
     </ThemeProvider>
   );
-}
+};
 
 export default App;
