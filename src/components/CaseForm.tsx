@@ -21,6 +21,8 @@ import {
   Grow,
   Zoom,
   Collapse,
+  Avatar,
+  IconButton,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { ICase } from '../types/case';
@@ -29,6 +31,8 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { zhTW } from 'date-fns/locale';
 import { taipeiSchools, newTaipeiSchools, School } from '../constants/schools';
+import PhotoCamera from '@mui/icons-material/PhotoCamera';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
@@ -177,6 +181,7 @@ interface ICaseFormData {
   schoolDistrict: string;
   createdAt: string;
   updatedAt: string;
+  avatar?: string;
 }
 
 const CaseForm: React.FC = () => {
@@ -226,11 +231,13 @@ const CaseForm: React.FC = () => {
     schoolCity: 'taipei',
     schoolDistrict: '',
     createdAt: '',
-    updatedAt: ''
+    updatedAt: '',
+    avatar: '',
   });
 
   const [customSchools, setCustomSchools] = useState<School[]>([]);
   const [newSchoolInput, setNewSchoolInput] = useState('');
+  const [previewImage, setPreviewImage] = useState<string>('');
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = event.target;
@@ -442,7 +449,8 @@ const CaseForm: React.FC = () => {
           schoolCity: 'taipei',
           schoolDistrict: '',
           createdAt: '',
-          updatedAt: ''
+          updatedAt: '',
+          avatar: '',
         });
       } else {
         // 錯誤提示
@@ -509,7 +517,8 @@ const CaseForm: React.FC = () => {
               schoolCity: 'taipei',
               schoolDistrict: '',
               createdAt: '',
-              updatedAt: ''
+              updatedAt: '',
+              avatar: '',
             };
 
             const formattedData: ICaseFormData = {
@@ -606,6 +615,24 @@ const CaseForm: React.FC = () => {
     handleInputChange({ target: { name, value } } as React.ChangeEvent<HTMLInputElement>);
   };
 
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setPreviewImage(base64String);
+        setFormData(prev => ({ ...prev, avatar: base64String }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleDeleteImage = () => {
+    setPreviewImage('');
+    setFormData(prev => ({ ...prev, avatar: '' }));
+  };
+
   return (
     <Container maxWidth="lg">
       <Fade in={true} timeout={1000}>
@@ -621,6 +648,63 @@ const CaseForm: React.FC = () => {
                 </Typography>
               </Grow>
               <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <Box display="flex" alignItems="center" gap={2}>
+                    <Avatar
+                      src={previewImage || formData.avatar}
+                      variant="square"
+                      sx={{ 
+                        width: 200, 
+                        height: 200,
+                        borderRadius: 2,  // 添加輕微圓角
+                        boxShadow: 3     // 添加陰影效果
+                      }}
+                    />
+                    <Box>
+                      <input
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        id="avatar-upload"
+                        type="file"
+                        onChange={handleImageUpload}
+                      />
+                      <label htmlFor="avatar-upload">
+                        <IconButton
+                          color="primary"
+                          aria-label="上傳照片"
+                          component="span"
+                          sx={{ 
+                            backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                            '&:hover': {
+                              backgroundColor: 'rgba(0, 0, 0, 0.08)'
+                            }
+                          }}
+                        >
+                          <PhotoCamera />
+                        </IconButton>
+                      </label>
+                      {(previewImage || formData.avatar) && (
+                        <IconButton
+                          color="error"
+                          onClick={handleDeleteImage}
+                          aria-label="刪除照片"
+                          sx={{ 
+                            ml: 1,
+                            backgroundColor: 'rgba(211, 47, 47, 0.04)',
+                            '&:hover': {
+                              backgroundColor: 'rgba(211, 47, 47, 0.08)'
+                            }
+                          }}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      )}
+                      <Typography variant="caption" display="block" sx={{ mt: 1 }}>
+                        點擊相機圖示上傳大頭貼（建議尺寸：200x200像素）
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Grid>
                 <Grid item xs={12} sm={3}>
                   <Collapse in={true} timeout={1000}>
                     <StyledTextField
