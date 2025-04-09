@@ -10,11 +10,11 @@ const LoginContainer = styled('div')({
   margin: 0,
   backgroundColor: '#e493d0',
   backgroundImage: `
-    radial-gradient(closest-side, rgba(235, 105, 78, 1), rgba(235, 105, 78, 0)),
-    radial-gradient(closest-side, rgba(243, 11, 164, 1), rgba(243, 11, 164, 0)),
-    radial-gradient(closest-side, rgba(254, 234, 131, 1), rgba(254, 234, 131, 0)),
-    radial-gradient(closest-side, rgba(170, 142, 245, 1), rgba(170, 142, 245, 0)),
-    radial-gradient(closest-side, rgba(248, 192, 147, 1), rgba(248, 192, 147, 0))
+    radial-gradient(closest-side, rgb(159, 235, 78), rgba(235, 105, 78, 0)),
+    radial-gradient(closest-side, rgb(11, 243, 11), rgba(243, 11, 164, 0)),
+    radial-gradient(closest-side, hsl(141, 98.40%, 75.50%), rgba(254, 234, 131, 0)),
+    radial-gradient(closest-side, hsl(120, 83.70%, 75.90%), rgba(170, 142, 245, 0)),
+    radial-gradient(closest-side, hsl(159, 87.80%, 77.50%), rgba(248, 192, 147, 0))
   `,
   backgroundSize: `
     130vmax 130vmax,
