@@ -33,6 +33,7 @@ import {
   Settings,
   Language,
 } from '@mui/icons-material';
+import { Link as RouterLink } from 'react-router-dom';
 
 // 定義數據類型
 interface SchoolData {
@@ -115,52 +116,27 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
 const Dashboard: React.FC = () => {
   return (
-    <Box sx={{ px: 2 }}>
-      {/* 頂部導航區域 */}
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box>
-          <Breadcrumbs aria-label="breadcrumb">
-            <Link
-              underline="hover"
-              sx={{ display: 'flex', alignItems: 'center' }}
-              color="inherit"
-              href="/"
-            >
-              <Home sx={{ mr: 0.5 }} fontSize="inherit" />
-              儀表板
-            </Link>
-            <Typography color="text.primary">數據分析</Typography>
-          </Breadcrumbs>
-          <Typography variant="h5" sx={{ mt: 1 }}>
-            數據分析
-          </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-          <Paper
+    <Box sx={{ p: 2 }}>
+      <Box sx={{ mb: 3 }}>
+        <Breadcrumbs aria-label="breadcrumb">
+          <Box
+            component={RouterLink}
+            to="/"
             sx={{
-              p: '2px 4px',
               display: 'flex',
               alignItems: 'center',
-              width: 400,
-              borderRadius: '12px',
+              color: 'text.primary',
+              textDecoration: 'none',
+              '&:hover': {
+                textDecoration: 'underline',
+              },
             }}
           >
-            <InputBase
-              sx={{ ml: 1, flex: 1 }}
-              placeholder="Search here"
-            />
-            <IconButton type="button" sx={{ p: '10px' }}>
-              <Search />
-            </IconButton>
-          </Paper>
-          <IconButton>
-            <Settings />
-          </IconButton>
-          <IconButton>
-            <Notifications />
-          </IconButton>
-          <Avatar sx={{ width: 32, height: 32 }}>A</Avatar>
-        </Box>
+            <Home sx={{ mr: 0.5, fontSize: 20 }} />
+            首頁
+          </Box>
+          <Typography color="text.primary">儀表板</Typography>
+        </Breadcrumbs>
       </Box>
 
       {/* 學校分佈數據卡片 */}
@@ -209,9 +185,9 @@ const Dashboard: React.FC = () => {
             <Typography variant="h6" gutterBottom>
               年齡分佈
             </Typography>
-            <Box sx={{ height: 200 }}>
+            <Box sx={{ height: 250, p: 2 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={ageDistribution}>
+                <BarChart data={ageDistribution} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip />
@@ -228,9 +204,9 @@ const Dashboard: React.FC = () => {
             <Typography variant="h6" gutterBottom>
               季度統計
             </Typography>
-            <Box sx={{ height: 200 }}>
+            <Box sx={{ height: 250, p: 2 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={quarterlyStats}>
+                <LineChart data={quarterlyStats} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip />
@@ -253,15 +229,15 @@ const Dashboard: React.FC = () => {
             <Typography variant="h6" gutterBottom>
               性別分佈
             </Typography>
-            <Box sx={{ height: 200 }}>
+            <Box sx={{ height: 250, p: 0 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
+                <PieChart margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                   <Pie
                     data={genderDistribution}
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
-                    outerRadius={80}
+                    outerRadius={90}
                     fill="#8884d8"
                     dataKey="value"
                     label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
@@ -283,9 +259,9 @@ const Dashboard: React.FC = () => {
             <Typography variant="h6" gutterBottom>
               特殊身份分類
             </Typography>
-            <Box sx={{ height: 250 }}>
+            <Box sx={{ height: 300, p: 2 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={specialStatus}>
+                <BarChart data={specialStatus} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip />
@@ -306,9 +282,9 @@ const Dashboard: React.FC = () => {
             <Typography variant="h6" gutterBottom>
               平均收入分佈
             </Typography>
-            <Box sx={{ height: 250 }}>
+            <Box sx={{ height: 300, p: 2 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={incomeDistribution}>
+                <BarChart data={incomeDistribution} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip />

@@ -28,6 +28,7 @@ import {
   Home,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 
 // 修改模擬數據
 const mockCases = [
@@ -181,24 +182,27 @@ const CaseManagement: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      {/* 麵包屑導航 */}
+    <Box sx={{ p: 2 }}>
       <Box sx={{ mb: 3 }}>
         <Breadcrumbs aria-label="breadcrumb">
-          <Link
-            underline="hover"
-            sx={{ display: 'flex', alignItems: 'center' }}
-            color="inherit"
-            href="/"
+          <Box
+            component={RouterLink}
+            to="/"
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              color: 'text.primary',
+              textDecoration: 'none',
+              '&:hover': {
+                textDecoration: 'underline',
+              },
+            }}
           >
-            <Home sx={{ mr: 0.5 }} fontSize="inherit" />
+            <Home sx={{ mr: 0.5, fontSize: 20 }} />
             首頁
-          </Link>
+          </Box>
           <Typography color="text.primary">個案管理</Typography>
         </Breadcrumbs>
-        <Typography variant="h5" sx={{ mt: 1 }}>
-          個案管理
-        </Typography>
       </Box>
 
       {/* 搜索區域 */}
@@ -253,7 +257,7 @@ const CaseManagement: React.FC = () => {
       </Paper>
 
       {/* 個案列表 */}
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ p: 3 }}>
         <Table>
           <TableHead>
             <TableRow>

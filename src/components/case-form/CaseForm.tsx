@@ -23,14 +23,17 @@ import {
   Collapse,
   Avatar,
   IconButton,
+  Input,
+  FormHelperText,
+  FormGroup,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { ICase } from '../types/case';
+import { ICase } from '../../types/case';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { zhTW } from 'date-fns/locale';
-import { taipeiSchools, newTaipeiSchools, School } from '../constants/schools';
+import { taipeiSchools, newTaipeiSchools, School } from '../../constants/schools';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import DeleteIcon from '@mui/icons-material/Delete';
 
@@ -137,7 +140,7 @@ const districtMap: DistrictMapType = {
 interface ICaseFormData {
   id: string;
   name: string;
-  gender: 'male' | 'female' | '';
+  gender: 'male' | 'female' | 'other';
   birthDate: string;
   birthYear: string;
   birthMonth: string;
@@ -148,39 +151,91 @@ interface ICaseFormData {
   address: {
     city: 'taipei' | 'newTaipei' | 'other';
     district: string;
-    otherCity: string;
-    otherDistrict: string;
+    otherCity?: string;
+    otherDistrict?: string;
     detail: string;
   };
   contactPerson: {
     name: string;
-    relation: string;
-    otherRelation: string;
-    phone: string;
+    relationship: string;
+    otherRelation?: string;
     phoneAreaCode: string;
-    otherPhoneAreaCode: string;
+    otherPhoneAreaCode?: string;
+    phone: string;
     mobile: string;
+    email: string;
   };
   specialStatus: {
-    none: boolean;
-    lowIncome: boolean;
-    lowIncomeCardNumber: string;
-    middleLowIncome: boolean;
-    nearPoverty: boolean;
-    majorIllness: boolean;
-    majorIllnessDescription: string;
-    disability: boolean;
-    icfCode: string;
-    indigenous: boolean;
-    indigenousType: string;
+    isLowIncome: boolean;
+    isSingleParent: boolean;
+    isNewImmigrant: boolean;
+    isIndigenous: boolean;
+    isDisability: boolean;
     other: string;
   };
-  schoolType: 'elementary' | 'junior' | 'high' | '';
-  school: string;
-  schoolCity: 'taipei' | 'newTaipei' | 'other';
-  schoolDistrict: string;
+  economicStatus: {
+    monthlyIncome: number;
+    hasDebt: boolean;
+    debtAmount: number;
+    debtReason: string;
+  };
+  scores: {
+    family: number;
+    school: number;
+    social: number;
+    total: number;
+  };
+  familyStatus: {
+    parents: {
+      father: {
+        name: string;
+        age: number;
+        occupation: string;
+        education: string;
+        health: string;
+      };
+      mother: {
+        name: string;
+        age: number;
+        occupation: string;
+        education: string;
+        health: string;
+      };
+    };
+    siblings: Array<{
+      name: string;
+      age: number;
+      relationship: string;
+      school: string;
+    }>;
+    livingWith: string;
+    familyTreeUrl: string;
+  };
+  schoolInfo: {
+    name: string;
+    grade: string;
+    class: string;
+    teacher: string;
+    performance: {
+      academic: string;
+      behavior: string;
+      attendance: string;
+    };
+  };
+  mentalAssessment: {
+    anxiety: number;
+    depression: number;
+    stress: number;
+    selfEsteem: number;
+    socialSupport: number;
+  };
   createdAt: string;
   updatedAt: string;
+  status: 'active' | 'inactive' | 'archived';
+  schoolCity: 'taipei' | 'newTaipei' | 'other';
+  schoolDistrict: string;
+  schoolType: 'elementary' | 'junior' | 'high' | '';
+  school: string;
   avatar?: string;
 }
 
@@ -204,49 +259,13 @@ const CaseForm: React.FC<CaseFormProps> = ({ formData, onFormDataChange }) => {
       } as Partial<ICaseFormData>);
     } else if (fieldNames.length === 2) {
       const [parent, child] = fieldNames;
-      if (parent === 'specialStatus') {
-        if (child === 'none' && checked) {
-          onFormDataChange({
-            specialStatus: {
-              none: true,
-              lowIncome: false,
-              lowIncomeCardNumber: '',
-              middleLowIncome: false,
-              nearPoverty: false,
-              majorIllness: false,
-              majorIllnessDescription: '',
-              disability: false,
-              icfCode: '',
-              indigenous: false,
-              indigenousType: '',
-              other: ''
-            }
-          });
-        } else if (checked) {
-          onFormDataChange({
-            specialStatus: {
-              ...formData.specialStatus,
-              none: false,
-              [child]: checked
-            }
-          });
-        } else {
-          onFormDataChange({
-            specialStatus: {
-              ...formData.specialStatus,
-              [child]: checked
-            }
-          });
+      const parentKey = parent as keyof ICaseFormData;
+      onFormDataChange({
+        [parentKey]: {
+          ...(formData[parentKey] as Record<string, any>),
+          [child]: type === 'checkbox' ? checked : value
         }
-      } else {
-        const parentKey = parent as keyof ICaseFormData;
-        onFormDataChange({
-          [parentKey]: {
-            ...(formData[parentKey] as Record<string, any>),
-            [child]: type === 'checkbox' ? checked : value
-          }
-        });
-      }
+      });
     } else if (fieldNames.length === 3) {
       const [parent, child, grandChild] = fieldNames;
       const parentKey = parent as keyof ICaseFormData;
@@ -312,16 +331,8 @@ const CaseForm: React.FC<CaseFormProps> = ({ formData, onFormDataChange }) => {
 
   const handleDateChange = (date: Date | null) => {
     if (date) {
-      const year = date.getFullYear().toString();
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const day = date.getDate().toString().padStart(2, '0');
-      const dateString = date.toISOString().split('T')[0];
-
       onFormDataChange({
-        birthDate: dateString,
-        birthYear: year,
-        birthMonth: month,
-        birthDay: day
+        birthDate: date.toISOString().split('T')[0]
       });
     }
   };
@@ -373,33 +384,80 @@ const CaseForm: React.FC<CaseFormProps> = ({ formData, onFormDataChange }) => {
           },
           contactPerson: {
             name: '',
-            relation: 'father',
+            relationship: 'father',
             otherRelation: '',
-            phone: '',
-            phoneAreaCode: '02',
+            phoneAreaCode: '',
             otherPhoneAreaCode: '',
-            mobile: ''
+            phone: '',
+            mobile: '',
+            email: '',
           },
           specialStatus: {
-            none: true,
-            lowIncome: false,
-            lowIncomeCardNumber: '',
-            middleLowIncome: false,
-            nearPoverty: false,
-            majorIllness: false,
-            majorIllnessDescription: '',
-            disability: false,
-            icfCode: '',
-            indigenous: false,
-            indigenousType: '',
-            other: ''
+            isLowIncome: false,
+            isSingleParent: false,
+            isNewImmigrant: false,
+            isIndigenous: false,
+            isDisability: false,
+            other: '',
           },
-          schoolType: '',
-          school: '',
-          schoolCity: 'taipei',
-          schoolDistrict: '',
+          economicStatus: {
+            monthlyIncome: 0,
+            hasDebt: false,
+            debtAmount: 0,
+            debtReason: '',
+          },
+          scores: {
+            family: 0,
+            school: 0,
+            social: 0,
+            total: 0,
+          },
+          familyStatus: {
+            parents: {
+              father: {
+                name: '',
+                age: 0,
+                occupation: '',
+                education: '',
+                health: '',
+              },
+              mother: {
+                name: '',
+                age: 0,
+                occupation: '',
+                education: '',
+                health: '',
+              },
+            },
+            siblings: [],
+            livingWith: '',
+            familyTreeUrl: '',
+          },
+          schoolInfo: {
+            name: '',
+            grade: '',
+            class: '',
+            teacher: '',
+            performance: {
+              academic: '',
+              behavior: '',
+              attendance: '',
+            },
+          },
+          mentalAssessment: {
+            anxiety: 0,
+            depression: 0,
+            stress: 0,
+            selfEsteem: 0,
+            socialSupport: 0,
+          },
           createdAt: '',
           updatedAt: '',
+          status: 'active',
+          schoolCity: 'taipei',
+          schoolDistrict: '',
+          schoolType: '',
+          school: '',
           avatar: '',
         });
       } else {
@@ -420,12 +478,12 @@ const CaseForm: React.FC<CaseFormProps> = ({ formData, onFormDataChange }) => {
         try {
           const response = await getCase(caseId);
           if (response.success && response.data) {
-            const { createdBy, updatedBy, status, ...caseData } = response.data;
+            const { createdBy, updatedBy, status, ...caseData } = response.data as ICase;
             const defaultFormData: ICaseFormData = {
               id: '',
               name: '',
               gender: 'male',
-              birthDate: new Date().toISOString().split('T')[0],
+              birthDate: caseData.birthDate instanceof Date ? caseData.birthDate.toISOString().split('T')[0] : String(caseData.birthDate),
               birthYear: '',
               birthMonth: '',
               birthDay: '',
@@ -440,57 +498,107 @@ const CaseForm: React.FC<CaseFormProps> = ({ formData, onFormDataChange }) => {
                 detail: ''
               },
               contactPerson: {
-                name: '',
-                relation: 'father',
-                otherRelation: '',
-                phone: '',
-                phoneAreaCode: '02',
-                otherPhoneAreaCode: '',
-                mobile: ''
+                name: caseData.contactPerson?.name || '',
+                relationship: caseData.contactPerson?.relationship || 'father',
+                otherRelation: caseData.contactPerson?.otherRelation || '',
+                phoneAreaCode: caseData.contactPerson?.phoneAreaCode || '',
+                otherPhoneAreaCode: caseData.contactPerson?.otherPhoneAreaCode || '',
+                phone: caseData.contactPerson?.phone || '',
+                mobile: caseData.contactPerson?.mobile || '',
+                email: caseData.contactPerson?.email || '',
               },
               specialStatus: {
-                none: true,
-                lowIncome: false,
-                lowIncomeCardNumber: '',
-                middleLowIncome: false,
-                nearPoverty: false,
-                majorIllness: false,
-                majorIllnessDescription: '',
-                disability: false,
-                icfCode: '',
-                indigenous: false,
-                indigenousType: '',
-                other: ''
+                isLowIncome: false,
+                isSingleParent: false,
+                isNewImmigrant: false,
+                isIndigenous: false,
+                isDisability: false,
+                other: '',
               },
-              schoolType: '',
-              school: '',
+              economicStatus: {
+                monthlyIncome: 0,
+                hasDebt: false,
+                debtAmount: 0,
+                debtReason: '',
+              },
+              scores: {
+                family: 0,
+                school: 0,
+                social: 0,
+                total: 0,
+              },
+              familyStatus: {
+                parents: {
+                  father: {
+                    name: '',
+                    age: 0,
+                    occupation: '',
+                    education: '',
+                    health: '',
+                  },
+                  mother: {
+                    name: '',
+                    age: 0,
+                    occupation: '',
+                    education: '',
+                    health: '',
+                  },
+                },
+                siblings: [],
+                livingWith: '',
+                familyTreeUrl: '',
+              },
+              schoolInfo: {
+                name: '',
+                grade: '',
+                class: '',
+                teacher: '',
+                performance: {
+                  academic: '',
+                  behavior: '',
+                  attendance: '',
+                },
+              },
+              mentalAssessment: {
+                anxiety: 0,
+                depression: 0,
+                stress: 0,
+                selfEsteem: 0,
+                socialSupport: 0,
+              },
+              createdAt: caseData.createdAt instanceof Date ? caseData.createdAt.toISOString() : String(caseData.createdAt),
+              updatedAt: caseData.updatedAt instanceof Date ? caseData.updatedAt.toISOString() : String(caseData.updatedAt),
+              status: 'active',
               schoolCity: 'taipei',
               schoolDistrict: '',
-              createdAt: '',
-              updatedAt: '',
+              schoolType: '',
+              school: '',
               avatar: '',
             };
 
             const formattedData: ICaseFormData = {
               ...defaultFormData,
               ...caseData,
-              birthDate: typeof caseData.birthDate === 'string' ? caseData.birthDate : caseData.birthDate.toISOString().split('T')[0],
-              schoolCity: ((caseData as any).schoolCity as 'taipei' | 'newTaipei' | 'other') || 'taipei',
-              schoolDistrict: (caseData as any).schoolDistrict || '',
-              createdAt: typeof caseData.createdAt === 'string' ? caseData.createdAt : caseData.createdAt.toISOString(),
-              updatedAt: typeof caseData.updatedAt === 'string' ? caseData.updatedAt : caseData.updatedAt.toISOString(),
-              address: {
-                ...defaultFormData.address,
-                ...caseData.address
-              },
-              contactPerson: {
-                ...defaultFormData.contactPerson,
-                ...caseData.contactPerson
-              },
+              birthDate: caseData.birthDate instanceof Date ? caseData.birthDate.toISOString().split('T')[0] : String(caseData.birthDate),
+              createdAt: caseData.createdAt instanceof Date ? caseData.createdAt.toISOString() : String(caseData.createdAt),
+              updatedAt: caseData.updatedAt instanceof Date ? caseData.updatedAt.toISOString() : String(caseData.updatedAt),
               specialStatus: {
-                ...defaultFormData.specialStatus,
-                ...caseData.specialStatus
-              }
+                isLowIncome: false,
+                isSingleParent: false,
+                isNewImmigrant: false,
+                isIndigenous: false,
+                isDisability: false,
+                other: '',
+              },
+              schoolCity: 'taipei',
+              schoolDistrict: '',
+              address: {
+                city: 'taipei',
+                district: '',
+                otherCity: '',
+                otherDistrict: '',
+                detail: '',
+              },
             };
             onFormDataChange(formattedData);
           }
@@ -507,16 +615,14 @@ const CaseForm: React.FC<CaseFormProps> = ({ formData, onFormDataChange }) => {
   const handleAddSchool = () => {
     if (newSchoolInput.trim() && formData.schoolType) {
       const newSchool: School = {
+        id: `custom_${Date.now()}`,
+        name: newSchoolInput.trim(),
         value: `custom_${Date.now()}`,
         label: newSchoolInput.trim(),
         type: formData.schoolType as 'elementary' | 'junior' | 'high',
         district: formData.schoolDistrict
       };
-      onFormDataChange({
-        school: newSchool.value,
-        schoolDistrict: newSchool.district
-      });
-      setCustomSchools(prev => [...prev, newSchool]);
+      setCustomSchools([...customSchools, newSchool]);
       setNewSchoolInput('');
     }
   };
@@ -708,6 +814,7 @@ const CaseForm: React.FC<CaseFormProps> = ({ formData, onFormDataChange }) => {
                     >
                       <FormControlLabel value="male" control={<Radio />} label="男" />
                       <FormControlLabel value="female" control={<Radio />} label="女" />
+                      <FormControlLabel value="other" control={<Radio />} label="其他" />
                     </RadioGroup>
                   </FormControl>
                 </Grid>
@@ -884,96 +991,98 @@ const CaseForm: React.FC<CaseFormProps> = ({ formData, onFormDataChange }) => {
               </Grow>
               <Grid container spacing={3}>
                 <Grid item xs={12} sm={6}>
-                  <Collapse in={true} timeout={1000}>
-                    <TextField
+                  <StyledTextField
+                    fullWidth
+                    label="聯絡人姓名"
+                    name="contactPerson.name"
+                    value={formData.contactPerson.name}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth>
+                    <InputLabel>關係</InputLabel>
+                    <StyledSelect
+                      name="contactPerson.relationship"
+                      value={formData.contactPerson.relationship}
+                      onChange={handleSelectInputChange}
+                      required
+                    >
+                      <MenuItem value="father">父親</MenuItem>
+                      <MenuItem value="mother">母親</MenuItem>
+                      <MenuItem value="guardian">監護人</MenuItem>
+                      <MenuItem value="other">其他</MenuItem>
+                    </StyledSelect>
+                  </FormControl>
+                </Grid>
+                {formData.contactPerson.relationship === 'other' && (
+                  <Grid item xs={12} sm={6}>
+                    <StyledTextField
                       fullWidth
-                      label="聯絡人姓名"
-                      name="contactPerson.name"
-                      value={formData.contactPerson.name}
+                      label="其他關係"
+                      name="contactPerson.otherRelation"
+                      value={formData.contactPerson.otherRelation}
                       onChange={handleInputChange}
                     />
-                  </Collapse>
-                </Grid>
+                  </Grid>
+                )}
                 <Grid item xs={12} sm={6}>
-                  <Collapse in={true} timeout={1000}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <FormControl sx={{ flex: 1 }}>
-                        <InputLabel>與個案關係</InputLabel>
-                        <Select
-                          name="contactPerson.relation"
-                          value={formData.contactPerson.relation}
-                          onChange={handleSelectInputChange}
-                          label="與個案關係"
-                        >
-                          <MenuItem value="father">父</MenuItem>
-                          <MenuItem value="mother">母</MenuItem>
-                          <MenuItem value="grandfather">祖父</MenuItem>
-                          <MenuItem value="grandmother">祖母</MenuItem>
-                          <MenuItem value="other">其他</MenuItem>
-                        </Select>
-                      </FormControl>
-                      {formData.contactPerson.relation === 'other' && (
-                        <TextField
-                          size="medium"
-                          label="請說明關係"
-                          name="contactPerson.otherRelation"
-                          value={formData.contactPerson.otherRelation || ''}
-                          onChange={handleInputChange}
-                          sx={{ width: '50%' }}
-                        />
-                      )}
-                    </Box>
-                  </Collapse>
+                  <FormControl fullWidth>
+                    <InputLabel>電話區號</InputLabel>
+                    <StyledSelect
+                      name="contactPerson.phoneAreaCode"
+                      value={formData.contactPerson.phoneAreaCode}
+                      onChange={handleSelectInputChange}
+                      required
+                    >
+                      <MenuItem value="02">02</MenuItem>
+                      <MenuItem value="03">03</MenuItem>
+                      <MenuItem value="other">其他</MenuItem>
+                    </StyledSelect>
+                  </FormControl>
                 </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Collapse in={true} timeout={1000}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <FormControl sx={{ width: '30%' }}>
-                        <InputLabel>區碼</InputLabel>
-                        <Select
-                          name="contactPerson.phoneAreaCode"
-                          value={formData.contactPerson.phoneAreaCode || '02'}
-                          onChange={handleSelectInputChange}
-                          label="區碼"
-                        >
-                          <MenuItem value="02">02</MenuItem>
-                          <MenuItem value="other">其他</MenuItem>
-                        </Select>
-                      </FormControl>
-                      {formData.contactPerson.phoneAreaCode === 'other' ? (
-                        <TextField
-                          size="medium"
-                          label="區碼"
-                          name="contactPerson.otherPhoneAreaCode"
-                          value={formData.contactPerson.otherPhoneAreaCode || ''}
-                          onChange={handleInputChange}
-                          sx={{ width: '20%' }}
-                        />
-                      ) : null}
-                      <TextField
-                        fullWidth
-                        label="聯絡人電話"
-                        name="contactPerson.phone"
-                        value={formData.contactPerson.phone}
-                        onChange={handleInputChange}
-                        error={formData.contactPerson.phone !== '' && !/^\d{7,8}$/.test(formData.contactPerson.phone)}
-                        helperText={formData.contactPerson.phone !== '' && !/^\d{7,8}$/.test(formData.contactPerson.phone) ? '請輸入7-8位數字' : ''}
-                      />
-                    </Box>
-                  </Collapse>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Collapse in={true} timeout={1000}>
-                    <TextField
+                {formData.contactPerson.phoneAreaCode === 'other' && (
+                  <Grid item xs={12} sm={6}>
+                    <StyledTextField
                       fullWidth
-                      label="聯絡人手機"
-                      name="contactPerson.mobile"
-                      value={formData.contactPerson.mobile}
+                      label="其他區號"
+                      name="contactPerson.otherPhoneAreaCode"
+                      value={formData.contactPerson.otherPhoneAreaCode}
                       onChange={handleInputChange}
-                      error={formData.contactPerson.mobile !== '' && !/^09\d{8}$/.test(formData.contactPerson.mobile)}
-                      helperText={formData.contactPerson.mobile !== '' && !/^09\d{8}$/.test(formData.contactPerson.mobile) ? '請輸入09開頭的10位數字' : ''}
                     />
-                  </Collapse>
+                  </Grid>
+                )}
+                <Grid item xs={12} sm={6}>
+                  <StyledTextField
+                    fullWidth
+                    label="電話號碼"
+                    name="contactPerson.phone"
+                    value={formData.contactPerson.phone}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <StyledTextField
+                    fullWidth
+                    label="手機號碼"
+                    name="contactPerson.mobile"
+                    value={formData.contactPerson.mobile}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <StyledTextField
+                    fullWidth
+                    label="電子郵件"
+                    name="contactPerson.email"
+                    value={formData.contactPerson.email}
+                    onChange={handleInputChange}
+                    type="email"
+                    required
+                  />
                 </Grid>
               </Grid>
             </Box>
@@ -985,159 +1094,70 @@ const CaseForm: React.FC<CaseFormProps> = ({ formData, onFormDataChange }) => {
                 </Typography>
               </Grow>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <Collapse in={true} timeout={1000}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={formData.specialStatus.none}
-                          onChange={handleInputChange}
-                          name="specialStatus.none"
-                        />
-                      }
-                      label="無"
-                    />
-                  </Collapse>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Collapse in={true} timeout={1000}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Grid item xs={12}>
+                  <FormControl component="fieldset">
+                    <FormLabel component="legend">特殊身分狀態</FormLabel>
+                    <FormGroup>
                       <FormControlLabel
                         control={
                           <Checkbox
-                            checked={formData.specialStatus.lowIncome}
+                            checked={formData.specialStatus.isLowIncome}
                             onChange={handleInputChange}
-                            name="specialStatus.lowIncome"
+                            name="specialStatus.isLowIncome"
                           />
                         }
                         label="低收入戶"
                       />
-                      {formData.specialStatus.lowIncome && (
-                        <TextField
-                          size="small"
-                          label="卡號"
-                          name="specialStatus.lowIncomeCardNumber"
-                          value={formData.specialStatus.lowIncomeCardNumber}
-                          onChange={handleInputChange}
-                        />
-                      )}
-                    </Box>
-                  </Collapse>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Collapse in={true} timeout={1000}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={formData.specialStatus.middleLowIncome}
-                          onChange={handleInputChange}
-                          name="specialStatus.middleLowIncome"
-                        />
-                      }
-                      label="中低收"
-                    />
-                  </Collapse>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Collapse in={true} timeout={1000}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={formData.specialStatus.nearPoverty}
-                          onChange={handleInputChange}
-                          name="specialStatus.nearPoverty"
-                        />
-                      }
-                      label="近貧"
-                    />
-                  </Collapse>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Collapse in={true} timeout={1000}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={formData.specialStatus.majorIllness}
-                          onChange={handleInputChange}
-                          name="specialStatus.majorIllness"
-                        />
-                      }
-                      label="重大傷病"
-                    />
-                  </Collapse>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Collapse in={true} timeout={1000}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                       <FormControlLabel
                         control={
                           <Checkbox
-                            checked={formData.specialStatus.disability}
+                            checked={formData.specialStatus.isSingleParent}
                             onChange={handleInputChange}
-                            name="specialStatus.disability"
+                            name="specialStatus.isSingleParent"
+                          />
+                        }
+                        label="單親家庭"
+                      />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={formData.specialStatus.isNewImmigrant}
+                            onChange={handleInputChange}
+                            name="specialStatus.isNewImmigrant"
+                          />
+                        }
+                        label="新住民"
+                      />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={formData.specialStatus.isIndigenous}
+                            onChange={handleInputChange}
+                            name="specialStatus.isIndigenous"
+                          />
+                        }
+                        label="原住民"
+                      />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={formData.specialStatus.isDisability}
+                            onChange={handleInputChange}
+                            name="specialStatus.isDisability"
                           />
                         }
                         label="身心障礙"
                       />
-                      {formData.specialStatus.disability && (
-                        <TextField
-                          size="small"
-                          label="ICF編碼"
-                          name="specialStatus.icfCode"
-                          value={formData.specialStatus.icfCode}
-                          onChange={handleInputChange}
-                        />
-                      )}
-                    </Box>
-                  </Collapse>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Collapse in={true} timeout={1000}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={formData.specialStatus.indigenous}
-                          onChange={handleInputChange}
-                          name="specialStatus.indigenous"
-                        />
-                      }
-                      label="原住民身分"
-                    />
-                    {formData.specialStatus.indigenous && (
                       <TextField
                         fullWidth
-                        label="原住民類型"
-                        name="specialStatus.indigenousType"
-                        value={formData.specialStatus.indigenousType}
-                        onChange={handleInputChange}
-                        sx={{ mt: 1 }}
-                      />
-                    )}
-                  </Collapse>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Collapse in={true} timeout={1000}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={formData.specialStatus.other !== ''}
-                          onChange={handleInputChange}
-                          name="specialStatus.other"
-                        />
-                      }
-                      label="其他"
-                    />
-                    {formData.specialStatus.other !== '' && (
-                      <TextField
-                        fullWidth
-                        label="其他說明"
+                        label="其他特殊狀況"
                         name="specialStatus.other"
                         value={formData.specialStatus.other}
                         onChange={handleInputChange}
-                        sx={{ mt: 1 }}
+                        margin="normal"
                       />
-                    )}
-                  </Collapse>
+                    </FormGroup>
+                  </FormControl>
                 </Grid>
               </Grid>
             </Box>

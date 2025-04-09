@@ -10,21 +10,37 @@ import {
   Fade,
   IconButton,
   styled,
+  Breadcrumbs,
+  Avatar,
+  Stepper,
+  Step,
+  StepLabel,
+  StepContent,
 } from '@mui/material';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import CaseForm from './CaseForm';
-import CaregiverInfo from './CaregiverInfo';
-import FamilyTreeUpload from './FamilyTreeUpload';
-import FamilyStatus from './FamilyStatus';
-import FamilyEconomic from './FamilyEconomic';
-import FamilyMental from './FamilyMental';
-import SchoolPerformance from './SchoolPerformance';
-import EmotionalAssessment from './EmotionalAssessment';
-import FinalAssessment from './FinalAssessment';
+import {
+  Home,
+  PhotoCamera,
+  Save,
+  ArrowBack,
+  KeyboardArrowRight,
+  KeyboardArrowLeft,
+  KeyboardArrowDown,
+  KeyboardArrowUp,
+  NavigateNext,
+  NavigateBefore,
+  ArrowForwardIos,
+} from '@mui/icons-material';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import CaseForm from './case-form/CaseForm';
+import CaregiverInfo from './case-form/CaregiverInfo';
+import FamilyTreeUpload from './case-form/FamilyTreeUpload';
+import FamilyStatus from './case-form/FamilyStatus';
+import FamilyEconomic from './case-form/FamilyEconomic';
+import FamilyMental from './case-form/FamilyMental';
+import SchoolPerformance from './case-form/SchoolPerformance';
+import EmotionalAssessment from './case-form/EmotionalAssessment';
+import FinalAssessment from './case-form/FinalAssessment';
+import { ICaseFormData } from '../types/case';
 
 // 步驟標題
 const steps = [
@@ -39,56 +55,7 @@ const steps = [
   '整體評估(4Q)與簽章'
 ];
 
-interface FormData {
-  // CaseForm 的數據
-  id: string;
-  name: string;
-  gender: 'male' | 'female' | '';
-  birthDate: string;
-  birthYear: string;
-  birthMonth: string;
-  birthDay: string;
-  idNumber: string;
-  phone: string;
-  email: string;
-  address: {
-    city: 'taipei' | 'newTaipei' | 'other';
-    district: string;
-    otherCity: string;
-    otherDistrict: string;
-    detail: string;
-  };
-  contactPerson: {
-    name: string;
-    relation: string;
-    otherRelation: string;
-    phone: string;
-    phoneAreaCode: string;
-    otherPhoneAreaCode: string;
-    mobile: string;
-  };
-  specialStatus: {
-    none: boolean;
-    lowIncome: boolean;
-    lowIncomeCardNumber: string;
-    middleLowIncome: boolean;
-    nearPoverty: boolean;
-    majorIllness: boolean;
-    majorIllnessDescription: string;
-    disability: boolean;
-    icfCode: string;
-    indigenous: boolean;
-    indigenousType: string;
-    other: string;
-  };
-  schoolType: 'elementary' | 'junior' | 'high' | '';
-  school: string;
-  schoolCity: 'taipei' | 'newTaipei' | 'other';
-  schoolDistrict: string;
-  createdAt: string;
-  updatedAt: string;
-  avatar?: string;
-  
+interface FormData extends ICaseFormData {
   // Step 2 的數據
   caseSource: string;
   hasHelp: string;
@@ -192,7 +159,7 @@ const StyledButton = styled(Button)(({ theme }) => ({
   justifyContent: 'center',
   gap: '12px',
   whiteSpace: 'nowrap',
-  flexShrink: 0,
+  flexShrink: 5,
   '&:hover': {
     backgroundColor: '#f5f5f5',
     transform: 'translateY(-2px)',
@@ -250,11 +217,10 @@ const StepperForm: React.FC = () => {
   const [showMore, setShowMore] = useState(false);
   const stepperRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<FormData>({
-    // CaseForm 初始值
     id: '',
     name: '',
-    gender: '',
-    birthDate: new Date().toISOString().split('T')[0],
+    gender: 'male',
+    birthDate: '',
     birthYear: '',
     birthMonth: '',
     birthDay: '',
@@ -270,64 +236,113 @@ const StepperForm: React.FC = () => {
     },
     contactPerson: {
       name: '',
-      relation: 'father',
+      relationship: 'father',
       otherRelation: '',
-      phone: '',
-      phoneAreaCode: '02',
+      phoneAreaCode: '',
       otherPhoneAreaCode: '',
-      mobile: ''
+      phone: '',
+      mobile: '',
+      email: ''
     },
     specialStatus: {
-      none: true,
-      lowIncome: false,
-      lowIncomeCardNumber: '',
-      middleLowIncome: false,
-      nearPoverty: false,
-      majorIllness: false,
-      majorIllnessDescription: '',
-      disability: false,
-      icfCode: '',
-      indigenous: false,
-      indigenousType: '',
+      isLowIncome: false,
+      isSingleParent: false,
+      isNewImmigrant: false,
+      isIndigenous: false,
+      isDisability: false,
       other: ''
     },
-    schoolType: '',
-    school: '',
-    schoolCity: 'taipei',
-    schoolDistrict: '',
+    economicStatus: {
+      monthlyIncome: 0,
+      hasDebt: false,
+      debtAmount: 0,
+      debtReason: ''
+    },
+    scores: {
+      family: 0,
+      school: 0,
+      social: 0,
+      total: 0
+    },
+    familyStatus: {
+      parents: {
+        father: {
+          name: '',
+          age: 0,
+          occupation: '',
+          education: '',
+          health: ''
+        },
+        mother: {
+          name: '',
+          age: 0,
+          occupation: '',
+          education: '',
+          health: ''
+        }
+      },
+      siblings: [],
+      livingWith: '',
+      familyTreeUrl: ''
+    },
+    schoolInfo: {
+      name: '',
+      grade: '',
+      class: '',
+      teacher: '',
+      performance: {
+        academic: '',
+        behavior: '',
+        attendance: ''
+      }
+    },
+    mentalAssessment: {
+      anxiety: 0,
+      depression: 0,
+      stress: 0,
+      selfEsteem: 0,
+      socialSupport: 0
+    },
     createdAt: '',
     updatedAt: '',
+    status: 'active',
+    schoolCity: 'taipei',
+    schoolDistrict: '',
+    schoolType: '',
+    school: '',
     avatar: '',
-
-    // 其他步驟的初始值
+    // Step 2 的數據
     caseSource: '',
     hasHelp: '',
     firstMeetingNote: '',
     serviceItems: {
       supplies: false,
       companionship: false,
-      counseling: false,
+      counseling: false
     },
     otherServiceItems: '',
     providedResources: '',
+    // Step 3 的數據
     familyTreeFile: null,
     familyTreeNotes: '',
+    // Step 4 的數據
     familyComposition: '',
     marriageStatus: '',
     livingEnvironment: '',
     parentChildInteraction: '',
     caregiverHealth: '',
     specialFamilyEvents: '',
+    // Step 5 的數據
     incomeSources: {
       work: false,
-      government: false,
+      government: false
     },
     otherIncomeSource: '',
     monthlyIncome: '',
     expenseItems: {
       rent: false,
       tuition: false,
-      medical: false,
+      medical: false
     },
     otherExpenseItems: '',
     hasDebt: '',
@@ -335,29 +350,33 @@ const StepperForm: React.FC = () => {
       lowIncome: false,
       mediumLowIncome: false,
       governmentSubsidy: false,
-      churchResource: false,
+      churchResource: false
     },
     needMoreResources: '',
+    // Step 6 的數據
     caregiverMentalState: '',
     hasCounseling: '',
     familyDisability: '',
     familySupport: '',
     caregiverStressSources: '',
     needPsychologicalSupport: '',
+    // Step 7 的數據
     chineseScore: 0,
     mathScore: 0,
     englishScore: 0,
     schoolPerformance: '',
     hasLearningDifficulty: '',
     needsTutoring: '',
+    // Step 8 的數據
     eqAnswers: {},
+    // Step 9 的數據
     fqScore: '',
     hqScore: '',
     iqScore: '',
     eqScore: '',
     overallAssessment: '',
     socialWorkerSignature: '',
-    supervisorSignature: '',
+    supervisorSignature: ''
   });
   const [isDraft, setIsDraft] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -525,154 +544,181 @@ const StepperForm: React.FC = () => {
   };
 
   return (
-    <Box sx={{ width: '100%' }}>
-      <Box sx={{ 
-        maxWidth: '100%', 
-        position: 'relative',
-        px: 6,
-        py: 2,
-      }}>
-        {/* 左導航按鈕 */}
-        {showNavButtons && scrollPosition > 0 && (
-          <NavButton
-            onClick={() => handleScroll('left')}
-            sx={{ 
-              left: 8,
-              transition: 'all 0.3s ease',
-              opacity: scrollPosition > 0 ? 1 : 0,
-              '&:hover': {
-                backgroundColor: theme => theme.palette.primary.light,
-                color: 'white',
-              },
-            }}
-          >
-            <NavigateBeforeIcon fontSize="medium" />
-          </NavButton>
-        )}
-
-        {/* 主要選單容器 */}
-        <Stack 
-          direction="row" 
-          spacing={3} 
-          ref={scrollContainerRef}
-          sx={{ 
-            overflowX: 'auto',
-            overflowY: 'hidden',
-            pb: 1,
-            pt: 1,
-            scrollbarWidth: 'none',
-            '&::-webkit-scrollbar': {
-              display: 'none',
-            },
-            '& > *': {
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            },
-            scrollBehavior: 'smooth',
-            scrollPadding: '0 24px',
-          }}
-        >
-          {steps.map((label, index) => (
-            <StyledButton
-              key={label}
-              className={activeStep === index ? 'active' : ''}
-              onClick={() => handleStepClick(index)}
-              disabled={index > activeStep + 1} // 禁用未來的步驟
+    <Box sx={{ p: 1 }}>
+      {/* 麵包屑導航 */}
+      <Box sx={{ p: 1 }}>
+        <Box sx={{ mb: 0 }}>
+          <Breadcrumbs aria-label="breadcrumb">
+            <Box
+              component={RouterLink}
+              to="/"
               sx={{
-                opacity: index <= activeStep + 1 ? 1 : 0.5, // 未來步驟顯示半透明
-                transform: 'none',
-                minWidth: '240px',
-                flex: '0 0 auto',
-                // 添加完成步驟的樣式
-                ...(index < activeStep && {
-                  backgroundColor: theme => theme.palette.success.light,
-                  color: theme => theme.palette.success.contrastText,
-                  '& .step-number': {
-                    backgroundColor: theme => theme.palette.success.main,
-                    color: '#fff',
-                  },
-                  '& .arrow-icon': {
-                    color: theme => theme.palette.success.contrastText,
-                  },
-                }),
-                // 添加下一步的提示樣式
-                ...(index === activeStep + 1 && {
-                  borderStyle: 'dashed',
-                  borderWidth: '1.5px',
-                  borderColor: theme => theme.palette.primary.main,
-                }),
+                display: 'flex',
+                alignItems: 'center',
+                color: 'text.primary',
+                textDecoration: 'none',
+                '&:hover': {
+                  textDecoration: 'underline',
+                },
               }}
             >
-              <StepNumber className="step-number">
-                {index + 1}
-              </StepNumber>
-              {label}
-              {index < steps.length - 1 && (
-                <ArrowForwardIcon 
-                  className="arrow-icon"
-                  sx={{ 
-                    ml: 'auto',
-                    color: 'action.disabled',
-                    fontSize: '1.2rem',
-                  }} 
-                />
-              )}
-            </StyledButton>
-          ))}
-        </Stack>
-
-        {/* 右導航按鈕 */}
-        {showNavButtons && scrollContainerRef.current && 
-         scrollPosition < (scrollContainerRef.current.scrollWidth - scrollContainerRef.current.clientWidth - 10) && (
-          <NavButton
-            onClick={() => handleScroll('right')}
-            sx={{ 
-              right: 8,
-              transition: 'all 0.3s ease',
-              opacity: scrollContainerRef.current && 
-                      (scrollContainerRef.current.scrollWidth - 
-                       scrollContainerRef.current.clientWidth - 
-                       scrollPosition) > 10 ? 1 : 0,
-              '&:hover': {
-                backgroundColor: theme => theme.palette.primary.light,
-                color: 'white',
-              },
-            }}
-          >
-            <NavigateNextIcon fontSize="medium" />
-          </NavButton>
-        )}
+              <Home sx={{ mr: 0.5, fontSize: 20 }} />
+              首頁
+            </Box>
+            <Typography color="text.primary">新增個案</Typography>
+          </Breadcrumbs>
+        </Box>
       </Box>
 
-      <Container maxWidth="lg" sx={{ mt: 4 }}>
-        <Paper sx={{ p: 3 }}>
-          {getStepContent(activeStep)}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-            <Button
-              disabled={activeStep === 0}
-              onClick={handleBack}
-              variant="outlined"
+      {/* 步驟導航 */}
+      <Box sx={{ width: '100%' }}>
+        <Box sx={{ 
+          maxWidth: '100%', 
+          position: 'relative',
+          px: 6,
+          py: 2,
+        }}>
+          {/* 左導航按鈕 */}
+          {showNavButtons && scrollPosition > 0 && (
+            <NavButton
+              onClick={() => handleScroll('left')}
+              sx={{ 
+                left: 8,
+                transition: 'all 0.3s ease',
+                opacity: scrollPosition > 0 ? 1 : 0,
+                '&:hover': {
+                  backgroundColor: theme => theme.palette.primary.light,
+                  color: 'white',
+                },
+              }}
             >
-              上一步
-            </Button>
-            <Box>
-              <Button
-                variant="contained"
-                onClick={handleSaveDraft}
-                sx={{ mr: 1 }}
+              <NavigateBefore fontSize="medium" />
+            </NavButton>
+          )}
+
+          {/* 主要選單容器 */}
+          <Stack 
+            direction="row" 
+            spacing={3} 
+            ref={scrollContainerRef}
+            sx={{ 
+              overflowX: 'auto',
+              overflowY: 'hidden',
+              pb: 2,
+              pt: 2,
+              scrollbarWidth: 'none',
+              '&::-webkit-scrollbar': {
+                display: 'none',
+              },
+              '& > *': {
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              },
+              scrollBehavior: 'smooth',
+              scrollPadding: '0 24px',
+            }}
+          >
+            {steps.map((label, index) => (
+              <StyledButton
+                key={label}
+                className={activeStep === index ? 'active' : ''}
+                onClick={() => handleStepClick(index)}
+                disabled={index > activeStep + 1}
+                sx={{
+                  opacity: index <= activeStep + 1 ? 1 : 0.5,
+                  transform: 'none',
+                  minWidth: '240px',
+                  flex: '0 0 auto',
+                  ...(index < activeStep && {
+                    backgroundColor: theme => theme.palette.success.light,
+                    color: theme => theme.palette.success.contrastText,
+                    '& .step-number': {
+                      backgroundColor: theme => theme.palette.success.main,
+                      color: '#fff',
+                    },
+                    '& .arrow-icon': {
+                      color: theme => theme.palette.success.contrastText,
+                    },
+                  }),
+                  ...(index === activeStep + 1 && {
+                    borderStyle: 'dashed',
+                    borderWidth: '1.5px',
+                    borderColor: theme => theme.palette.primary.main,
+                  }),
+                }}
               >
-                儲存草稿
-              </Button>
+                <StepNumber className="step-number">
+                  {index + 1}
+                </StepNumber>
+                {label}
+                {index < steps.length - 1 && (
+                  <ArrowForwardIos 
+                    className="arrow-icon"
+                    sx={{
+                      ml: 'auto',
+                      color: 'action.disabled',
+                      fontSize: '1.2rem',
+                    }} 
+                  />
+                )}
+              </StyledButton>
+            ))}
+          </Stack>
+
+          {/* 右導航按鈕 */}
+          {showNavButtons && scrollContainerRef.current && 
+           scrollPosition < (scrollContainerRef.current.scrollWidth - scrollContainerRef.current.clientWidth - 10) && (
+            <NavButton
+              onClick={() => handleScroll('right')}
+              sx={{ 
+                right: 8,
+                transition: 'all 0.3s ease',
+                opacity: scrollContainerRef.current && 
+                        (scrollContainerRef.current.scrollWidth - 
+                         scrollContainerRef.current.clientWidth - 
+                         scrollPosition) > 10 ? 1 : 0,
+                '&:hover': {
+                  backgroundColor: theme => theme.palette.primary.light,
+                  color: 'white',
+                },
+              }}
+            >
+              <NavigateNext fontSize="medium" />
+            </NavButton>
+          )}
+        </Box>
+
+        {/* 主要內容區域 */}
+        <Container maxWidth={false} sx={{ mt: 0 }}>
+          <Paper sx={{ p: 3 , mt: 0 }}>
+            {getStepContent(activeStep)}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
               <Button
-                variant="contained"
-                onClick={handleNext}
-                disabled={activeStep === steps.length - 1}
+                disabled={activeStep === 0}
+                onClick={handleBack}
+                variant="outlined"
               >
-                下一步
+                上一步
               </Button>
+              <Box>
+                <Button
+                  variant="contained"
+                  onClick={handleSaveDraft}
+                  sx={{ mr: 1 }}
+                >
+                  儲存草稿
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={handleNext}
+                  disabled={activeStep === steps.length - 1}
+                >
+                  下一步
+                </Button>
+              </Box>
             </Box>
-          </Box>
-        </Paper>
-      </Container>
+          </Paper>
+        </Container>
+      </Box>
     </Box>
   );
 };

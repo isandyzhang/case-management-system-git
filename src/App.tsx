@@ -114,7 +114,7 @@ const App: React.FC = () => {
           >
             <Routes>
               <Route path="/" element={<Dashboard />} />
-              <Route path="/cases" element={<CaseManagement />} />
+              <Route path="/casesmanagement" element={<CaseManagement />} />
               <Route path="/new-case" element={<StepperForm />} />
               <Route path="/cases/new" element={<CaseEdit />} />
               <Route path="/cases/:id" element={<CaseEdit />} />

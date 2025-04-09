@@ -23,12 +23,14 @@ import {
   MenuItem,
   SelectChangeEvent,
   Autocomplete,
+  Breadcrumbs,
 } from '@mui/material';
-import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon, Email as EmailIcon } from '@mui/icons-material';
+import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon, Email as EmailIcon, Home } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import zhTW from 'date-fns/locale/zh-TW';
+import { Link as RouterLink } from 'react-router-dom';
 
 interface Activity {
   id: string;
@@ -129,9 +131,30 @@ const ActivityManagement: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: 2 }}>
+      <Box sx={{ mb: 3 }}>
+        <Breadcrumbs aria-label="breadcrumb">
+          <Box
+            component={RouterLink}
+            to="/"
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              color: 'text.primary',
+              textDecoration: 'none',
+              '&:hover': {
+                textDecoration: 'underline',
+              },
+            }}
+          >
+            <Home sx={{ mr: 0.5, fontSize: 20 }} />
+            首頁
+          </Box>
+          <Typography color="text.primary">活動管理</Typography>
+        </Breadcrumbs>
+      </Box>
+
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-        <Typography variant="h5">活動管理</Typography>
         <Button
           variant="contained"
           startIcon={<AddIcon />}

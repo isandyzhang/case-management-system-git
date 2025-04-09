@@ -35,7 +35,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
 
   const menuItems = [
     { text: '儀表板', icon: <Dashboard />, path: '/' },
-    { text: '個案管理', icon: <People />, path: '/cases' },
+    { text: '個案管理', icon: <People />, path: '/casesmanagement' },
     { text: '新增個案', icon: <Add />, path: '/new-case' },
     { text: '活動管理', icon: <EventIcon />, path: '/activities' },
   ];

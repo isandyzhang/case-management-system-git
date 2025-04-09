@@ -19,230 +19,223 @@ import {
   ArrowBack,
   KeyboardArrowRight,
   KeyboardArrowLeft,
+  Padding,
 } from '@mui/icons-material';
 import { useNavigate, useParams, Link as RouterLink } from 'react-router-dom';
-import CaseForm from './CaseForm';
-import CaregiverInfo from './CaregiverInfo';
-import FamilyTreeUpload from './FamilyTreeUpload';
-import FamilyStatus from './FamilyStatus';
-import FamilyEconomic from './FamilyEconomic';
-import FamilyMental from './FamilyMental';
-import SchoolPerformance from './SchoolPerformance';
-import EmotionalAssessment from './EmotionalAssessment';
-import FinalAssessment from './FinalAssessment';
+import CaseForm from './case-form/CaseForm';
+import CaregiverInfo from './case-form/CaregiverInfo';
+import FamilyTreeUpload from './case-form/FamilyTreeUpload';
+import FamilyStatus from './case-form/FamilyStatus';
+import FamilyEconomic from './case-form/FamilyEconomic';
+import FamilyMental from './case-form/FamilyMental';
+import SchoolPerformance from './case-form/SchoolPerformance';
+import EmotionalAssessment from './case-form/EmotionalAssessment';
+import FinalAssessment from './case-form/FinalAssessment';
+import { ICaseFormData } from '../types/case';
 
 const CaseEdit: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(0);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ICaseFormData>({
     id: '',
     name: '',
-    gender: '' as '' | 'male' | 'female',
+    gender: 'male',
+    birthDate: '',
     birthYear: '',
     birthMonth: '',
     birthDay: '',
-    birthDate: '',
     idNumber: '',
-    email: '',
     phone: '',
+    email: '',
     address: {
-      city: 'taipei' as 'taipei' | 'newTaipei' | 'other',
+      city: 'taipei',
       district: '',
       otherCity: '',
       otherDistrict: '',
-      detail: '',
+      detail: ''
     },
-    status: '進行中',
-    avatar: '',
     contactPerson: {
       name: '',
-      relation: '',
+      relationship: 'father',
       otherRelation: '',
-      phone: '',
       phoneAreaCode: '',
       otherPhoneAreaCode: '',
+      phone: '',
       mobile: '',
-    },
-    contactPhone: '',
-    contactRelation: '',
-    schoolType: '' as '' | 'high' | 'elementary' | 'junior',
-    school: '',
-    schoolCity: 'taipei' as 'taipei' | 'newTaipei' | 'other',
-    schoolDistrict: '',
-    schoolGrade: '',
-    schoolClass: '',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    contact: {
-      primary: {
-        name: '',
-        relation: '父親',
-        phone: '',
-      },
-      secondary: {
-        name: '',
-        relation: '',
-        phone: '',
-      },
+      email: ''
     },
     specialStatus: {
-      none: false,
-      lowIncome: false,
-      lowIncomeCardNumber: '',
-      middleLowIncome: false,
-      nearPoverty: false,
-      majorIllness: false,
-      majorIllnessDescription: '',
-      disability: false,
-      icfCode: '',
-      indigenous: false,
-      indigenousType: '',
-      other: '',
+      isLowIncome: false,
+      isSingleParent: false,
+      isNewImmigrant: false,
+      isIndigenous: false,
+      isDisability: false,
+      other: ''
     },
     economicStatus: {
-      monthlyIncome: '',
+      monthlyIncome: 0,
       hasDebt: false,
+      debtAmount: 0,
+      debtReason: ''
     },
     scores: {
-      fq: 0,
-      hq: 0,
-      iq: 0,
-      eq: 0,
+      family: 0,
+      school: 0,
+      social: 0,
+      total: 0
     },
-    familyTree: '',
     familyStatus: {
-      members: 0,
-      structure: '',
+      parents: {
+        father: {
+          name: '',
+          age: 0,
+          occupation: '',
+          education: '',
+          health: ''
+        },
+        mother: {
+          name: '',
+          age: 0,
+          occupation: '',
+          education: '',
+          health: ''
+        }
+      },
+      siblings: [],
+      livingWith: '',
+      familyTreeUrl: ''
     },
-    familyEconomic: {
-      income: '',
-      expenses: '',
-      assets: '',
+    schoolInfo: {
+      name: '',
+      grade: '',
+      class: '',
+      teacher: '',
+      performance: {
+        academic: '',
+        behavior: '',
+        attendance: ''
+      }
     },
-    familyMental: {
-      stressLevel: 0,
-      support: '',
+    mentalAssessment: {
+      anxiety: 0,
+      depression: 0,
+      stress: 0,
+      selfEsteem: 0,
+      socialSupport: 0
     },
-    schoolPerformance: {
-      academic: '',
-      behavior: '',
-    },
-    emotionalAssessment: {
-      score: 0,
-      notes: '',
-    },
-    finalAssessment: {
-      score: 0,
-      recommendations: '',
-    },
+    createdAt: '',
+    updatedAt: '',
+    status: 'active',
+    schoolCity: 'taipei',
+    schoolDistrict: '',
+    schoolType: '',
+    school: '',
+    avatar: ''
   });
 
   useEffect(() => {
-    // 模擬加載個案數據
-    const mockCaseData = {
-      id: '1',
-      name: '張小明',
-      gender: 'male' as 'male',
-      birthYear: '2010',
-      birthMonth: '01',
-      birthDay: '15',
-      birthDate: '2010-01-15',
-      idNumber: 'A123456789',
-      email: 'test@example.com',
-      phone: '0912345678',
-      address: {
-        city: 'taipei' as 'taipei',
-        district: '中正區',
-        otherCity: '',
-        otherDistrict: '',
-        detail: '重慶南路一段122號',
-      },
-      status: '進行中',
-      avatar: '',
-      contactPerson: {
-        name: '張大明',
-        relation: '父親',
-        otherRelation: '',
-        phone: '0223123456',
-        phoneAreaCode: '02',
-        otherPhoneAreaCode: '',
-        mobile: '0912345678',
-      },
-      contactPhone: '0912345678',
-      contactRelation: '父親',
-      schoolType: 'elementary' as 'elementary',
-      school: '台北市立中正國小',
-      schoolCity: 'taipei' as 'taipei',
-      schoolDistrict: '中正區',
-      schoolGrade: '三年級',
-      schoolClass: '甲班',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      contact: {
-        primary: {
+    if (id) {
+      // 这里应该调用 API 获取个案数据
+      // 暂时使用模拟数据
+      const mockCaseData: ICaseFormData = {
+        id: id,
+        name: '張小明',
+        gender: 'male',
+        birthDate: '2010-05-15',
+        birthYear: '2010',
+        birthMonth: '05',
+        birthDay: '15',
+        idNumber: 'A123456789',
+        email: 'example@example.com',
+        phone: '0912345678',
+        address: {
+          city: 'taipei',
+          district: '信義區',
+          otherCity: '',
+          otherDistrict: '',
+          detail: '信義路五段7號'
+        },
+        contactPerson: {
           name: '張大明',
-          relation: '父親',
-          phone: '0912345678',
+          relationship: 'father',
+          otherRelation: '',
+          phoneAreaCode: '02',
+          otherPhoneAreaCode: '',
+          phone: '23123456',
+          mobile: '0912345678',
+          email: 'father@example.com'
         },
-        secondary: {
-          name: '李小花',
-          relation: '母親',
-          phone: '0923456789',
+        specialStatus: {
+          isLowIncome: false,
+          isSingleParent: false,
+          isNewImmigrant: false,
+          isIndigenous: false,
+          isDisability: false,
+          other: ''
         },
-      },
-      specialStatus: {
-        none: false,
-        lowIncome: true,
-        lowIncomeCardNumber: '123456789',
-        middleLowIncome: false,
-        nearPoverty: false,
-        majorIllness: false,
-        majorIllnessDescription: '',
-        disability: false,
-        icfCode: '',
-        indigenous: false,
-        indigenousType: '',
-        other: '',
-      },
-      economicStatus: {
-        monthlyIncome: '30000',
-        hasDebt: false,
-      },
-      scores: {
-        fq: 85,
-        hq: 90,
-        iq: 88,
-        eq: 92,
-      },
-      familyTree: '',
-      familyStatus: {
-        members: 4,
-        structure: '核心家庭',
-      },
-      familyEconomic: {
-        income: '30000',
-        expenses: '20000',
-        assets: '500000',
-      },
-      familyMental: {
-        stressLevel: 3,
-        support: '良好',
-      },
-      schoolPerformance: {
-        academic: '中等',
-        behavior: '良好',
-      },
-      emotionalAssessment: {
-        score: 85,
-        notes: '情緒穩定，學習態度積極',
-      },
-      finalAssessment: {
-        score: 88,
-        recommendations: '建議持續追蹤學習狀況',
-      },
-    };
-    setFormData(mockCaseData);
+        economicStatus: {
+          monthlyIncome: 50000,
+          hasDebt: false,
+          debtAmount: 0,
+          debtReason: ''
+        },
+        scores: {
+          family: 0,
+          school: 0,
+          social: 0,
+          total: 0
+        },
+        familyStatus: {
+          parents: {
+            father: {
+              name: '張大明',
+              age: 45,
+              occupation: '工程師',
+              education: '大學',
+              health: '良好'
+            },
+            mother: {
+              name: '李小花',
+              age: 42,
+              occupation: '教師',
+              education: '大學',
+              health: '良好'
+            }
+          },
+          siblings: [],
+          livingWith: '父母',
+          familyTreeUrl: ''
+        },
+        schoolInfo: {
+          name: '台北市立中正國小',
+          grade: '三',
+          class: '甲',
+          teacher: '王老師',
+          performance: {
+            academic: '良好',
+            behavior: '良好',
+            attendance: '正常'
+          }
+        },
+        mentalAssessment: {
+          anxiety: 0,
+          depression: 0,
+          stress: 0,
+          selfEsteem: 0,
+          socialSupport: 0
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        status: 'active',
+        schoolCity: 'taipei',
+        schoolDistrict: '中正區',
+        schoolType: 'elementary',
+        school: '台北市立中正國小',
+        avatar: ''
+      };
+      setFormData(mockCaseData);
+    }
   }, [id]);
 
   const handleFormDataChange = (newData: any) => {
@@ -277,7 +270,7 @@ const CaseEdit: React.FC = () => {
     setFormData(updatedData); // 更新表單數據以顯示新的修改時間
     // 其他保存邏輯...
     // 保存成功後返回列表頁
-    navigate('/cases');
+    navigate('/casesmanagement');
   };
 
   const handleNext = () => {
@@ -326,49 +319,76 @@ const CaseEdit: React.FC = () => {
   ];
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 3 }}>
-        <RouterLink to="/" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}>
-          <Home sx={{ mr: 0.5 }} fontSize="inherit" />
-          首頁
-        </RouterLink>
-        <RouterLink to="/cases" style={{ textDecoration: 'none', color: 'inherit' }}>
-          個案管理
-        </RouterLink>
-        <Typography color="text.primary">編輯個案</Typography>
-      </Breadcrumbs>
-
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        mb: 3 
-      }}>
-        <Box>
-          <Typography variant="h5">
-            編輯個案：{formData.name}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            最後修改時間：{new Date(formData.updatedAt).toLocaleString('zh-TW')}
-          </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <Button
-            variant="outlined"
-            startIcon={<ArrowBack />}
-            onClick={() => navigate('/cases')}
+    <Box sx={{ p: 2 }}>
+      <Box sx={{ mb: 3 }}>
+        <Breadcrumbs aria-label="breadcrumb">
+          <Box
+            component={RouterLink}
+            to="/"
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              color: 'text.primary',
+              textDecoration: 'none',
+              '&:hover': {
+                textDecoration: 'underline',
+              },
+            }}
           >
-            返回
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<Save />}
-            onClick={handleSave}
+            <Home sx={{ mr: 0.5, fontSize: 20 }} />
+            首頁
+          </Box>
+          <Box
+            component={RouterLink}
+            to="/casesmanagement"
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              color: 'text.primary',
+              textDecoration: 'none',
+              '&:hover': {
+                textDecoration: 'underline',
+              },
+            }}
           >
-            保存
-          </Button>
-        </Box>
+            個案管理
+          </Box>
+          <Typography color="text.primary" >編輯個案</Typography>
+        </Breadcrumbs>
       </Box>
+
+      <Paper sx={{ p: 3, mb: 3 }}>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center'
+        }}>
+          <Box>
+            <Typography variant="h4" sx={{ fontWeight: 'bold', p:1 }}>
+              編輯個案：{formData.name}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ p:1 }}>
+              最後修改時間：{new Date(formData.updatedAt).toLocaleString('zh-TW')}
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button
+              variant="outlined"
+              startIcon={<ArrowBack />}
+              onClick={() => navigate('/casesmanagement')}
+            >
+              返回
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<Save />}
+              onClick={handleSave}
+            >
+              保存
+            </Button>
+          </Box>
+        </Box>
+      </Paper>
 
       <Paper sx={{ p: 3 }}>
         <Box sx={{ 
