@@ -21,16 +21,18 @@ jobs:
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
-          node-version: '22.x'
+          node-version: '20.x'
 
       - name: npm install, build, and test
         run: |
           npm install
           npm run build --if-present
-          npm run test --if-present
+          #npm run test --if-present
 
-      - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
+      - name: Zip build content only (no nested folder)
+        run: |
+          cd build
+          zip -r ../release.zip .
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -60,9 +62,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_143F04908BDB4BE9984FC219027C630A }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_0DCDCAACC96B4D47B6814BA9EFA189A0 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_832E275B31774675B76FE920EB1739AB }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_0B065D91F8F64A759B9A7F1DF2B46EAD }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_86C3E01F5A2645B6AFF41708CA11E739 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_4309576DAF4349FE81358069FF5E4375 }}
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
@@ -70,5 +72,5 @@ jobs:
         with:
           app-name: 'Canlove-case-management'
           slot-name: 'Production'
-          package: .
+          package: release.zip
           

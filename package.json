@@ -2,6 +2,7 @@
   "name": "case-management-system",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://isandyzhang.github.io/case-management-system-git",
   "engines": {
     "node": ">=20.0.0"
   },
