@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
 import { ThemeProvider, createTheme, CssBaseline, Box } from '@mui/material';
 import Navbar from './components/Navbar';
 import StepperForm from './components/StepperForm';
@@ -7,6 +7,9 @@ import Dashboard from './components/Dashboard';
 import CaseManagement from './components/CaseManagement';
 import CaseEdit from './components/CaseEdit';
 import ActivityManagement from './components/ActivityManagement';
+import Login from './pages/Login';
+import ProtectedRoute from './components/ProtectedRoute';
+import login2 from './login2';
 
 const theme = createTheme({
   palette: {
@@ -93,35 +96,50 @@ const theme = createTheme({
 });
 
 const App: React.FC = () => {
+  const handleLogout = () => {
+    localStorage.removeItem('isAuthenticated');
+    window.location.href = '/login';
+  };
+
   return (
-    // @ts-ignore
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <Box sx={{ display: 'flex', bgcolor: '#f5f7fa', minHeight: '100vh' }}>
-          <Navbar onLogout={() => {}} />
-          <Box
-            component="main"
-            sx={{
-              flexGrow: 1,
-              height: '100vh',
-              overflow: 'auto',
-              p: 3,
-              pl: '50px',
-              boxSizing: 'border-box',
-              bgcolor: '#f5f7fa',
-            }}
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/login2" element={<Login />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Box sx={{ display: 'flex', bgcolor: '#f5f7fa', minHeight: '100vh' }}>
+                  <Navbar onLogout={handleLogout} />
+                  <Box
+                    component="main"
+                    sx={{
+                      flexGrow: 1,
+                      height: '100vh',
+                      overflow: 'auto',
+                      p: 3,
+                      pl: '50px',
+                      boxSizing: 'border-box',
+                      bgcolor: '#f5f7fa',
+                    }}
+                  >
+                    <Outlet />
+                  </Box>
+                </Box>
+              </ProtectedRoute>
+            }
           >
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/casesmanagement" element={<CaseManagement />} />
-              <Route path="/new-case" element={<StepperForm />} />
-              <Route path="/cases/new" element={<CaseEdit />} />
-              <Route path="/cases/:id" element={<CaseEdit />} />
-              <Route path="/activities" element={<ActivityManagement />} />
-            </Routes>
-          </Box>
-        </Box>
+            <Route index element={<Dashboard />} />
+            <Route path="casesmanagement" element={<CaseManagement />} />
+            <Route path="new-case" element={<StepperForm />} />
+            <Route path="cases/new" element={<CaseEdit />} />
+            <Route path="cases/:id" element={<CaseEdit />} />
+            <Route path="activities" element={<ActivityManagement />} />
+          </Route>
+        </Routes>
       </Router>
     </ThemeProvider>
   );
