@@ -11,6 +11,7 @@ import {
   useTheme,
   useMediaQuery,
   Divider,
+  ListItemButton,
 } from '@mui/material';
 import {
   Dashboard,
@@ -125,8 +126,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
       {/* 主選單 */}
       <List sx={{ px: 2, py: 3 }}>
         {menuItems.map((item) => (
-          <ListItem
-            button
+          <ListItemButton
             component={Link}
             to={item.path}
             key={item.text}
@@ -150,11 +150,11 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
             <ListItemText 
               primary={item.text}
               primaryTypographyProps={{
-                fontSize: '0.95rem',
+                fontSize: '1rem',
                 fontWeight: location.pathname === item.path ? 600 : 400,
               }}
             />
-          </ListItem>
+          </ListItemButton>
         ))}
       </List>
 
@@ -162,8 +162,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
       <Box sx={{ mt: 'auto' }}>
         <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} />
         <List sx={{ p: 2 }}>
-          <ListItem
-            button
+          <ListItemButton
             onClick={onLogout}
             sx={{
               borderRadius: '12px',
@@ -185,7 +184,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
                 fontSize: '0.95rem',
               }}
             />
-          </ListItem>
+          </ListItemButton>
         </List>
       </Box>
     </Drawer>
