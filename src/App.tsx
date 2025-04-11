@@ -9,7 +9,6 @@ import CaseEdit from './components/CaseEdit';
 import ActivityManagement from './components/ActivityManagement';
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
-import login2 from './login2';
 
 const theme = createTheme({
   palette: {

@@ -10,20 +10,10 @@ const LoginContainer = styled(Box)({
   justifyContent: 'center',
   alignItems: 'center',
   minHeight: '100vh',
-  background: 'linear-gradient(135deg, #2e7d32, #4caf50, #66bb6a, #81c784)',
-  backgroundSize: '400% 400%',
-  animation: 'gradientAnimation 10s ease infinite',
-  '@keyframes gradientAnimation': {
-    '0%': {
-      backgroundPosition: '0% 50%',
-    },
-    '50%': {
-      backgroundPosition: '100% 50%',
-    },
-    '100%': {
-      backgroundPosition: '0% 50%',
-    },
-  },
+  background: 'url("/loginbackgorund.png")',
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+  backgroundRepeat: 'no-repeat',
 });
 
 const LoginBox = styled(motion.div)({
