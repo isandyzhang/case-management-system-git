@@ -1,9 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TextField, Button, Box, Typography, Link, IconButton, InputAdornment } from '@mui/material';
 import { Visibility, VisibilityOff, AccountCircle, Lock, Casino } from '@mui/icons-material';
 import styled from '@emotion/styled';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+
+const LoadingContainer = styled(motion.div)({
+  position: 'fixed',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  backgroundColor: '#ffffff',
+  zIndex: 9999,
+});
+
+const LoadingWrapper = styled(Box)({
+  width: '300px',
+  height: '300px',
+});
 
 const LoginContainer = styled(Box)({
   display: 'flex',
@@ -80,6 +99,7 @@ const StyledButton = styled(Button)({
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -87,6 +107,15 @@ const Login: React.FC = () => {
   const [loginError, setLoginError] = useState<string | null>(null);
   const [userNumber, setUserNumber] = useState<number | null>(null);
   const [showGameInput, setShowGameInput] = useState(false);
+
+  useEffect(() => {
+    // 模擬載入時間
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleLogin = () => {
     if (username === 'admin' && password === '123456') {
@@ -125,163 +154,184 @@ const Login: React.FC = () => {
   };
 
   return (
-    <LoginContainer>
-      <LoginBox
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <ImageSection>
-          <LogoImage 
-            src="/logo.png"
-            alt="個案管理系統"
-            whileHover={{ rotate: 360 }}
-            transition={{ duration: 0.8 }}
-          />
-        </ImageSection>
-        <FormSection>
-          <Typography variant="h4" component="h1" gutterBottom sx={{ color: '#2e7d32', fontWeight: 'bold' }}>
-            歡迎回來
-          </Typography>
-          
-          <TextField
-            label="帳號"
-            variant="outlined"
-            margin="normal"
-            fullWidth
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <AccountCircle color="primary" />
-                </InputAdornment>
-              ),
-            }}
-          />
-          <TextField
-            label="密碼"
-            type={showPassword ? 'text' : 'password'}
-            variant="outlined"
-            margin="normal"
-            fullWidth
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Lock color="primary" />
-                </InputAdornment>
-              ),
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => setShowPassword(!showPassword)}
-                    edge="end"
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-          
-          {loginError && (
-            <Typography variant="body2" color="error" align="center" sx={{ mt: 1 }}>
-              {loginError}
+    <>
+      <AnimatePresence>
+        {isLoading && (
+          <LoadingContainer
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <LoadingWrapper>
+              <DotLottieReact
+                src="https://lottie.host/6f8fd7f9-a149-4d2a-a15e-d54b64793df0/Vw9Cdzfb0k.lottie"
+                loop
+                autoplay
+                style={{ width: '100%', height: '100%' }}
+              />
+            </LoadingWrapper>
+          </LoadingContainer>
+        )}
+      </AnimatePresence>
+      
+      <LoginContainer>
+        <LoginBox
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.5, delay: 2 }}
+        >
+          <ImageSection>
+            <LogoImage 
+              src="/logo.png"
+              alt="個案管理系統"
+              whileHover={{ rotate: 360 }}
+              transition={{ duration: 0.8 }}
+            />
+          </ImageSection>
+          <FormSection>
+            <Typography variant="h4" component="h1" gutterBottom sx={{ color: '#2e7d32', fontWeight: 'bold' }}>
+              Login
             </Typography>
-          )}
-
-          <StyledButton
-            variant="contained"
-            color="primary"
-            fullWidth
-            sx={{ mt: 3 }}
-            onClick={handleLogin}
-          >
-            登入系統
-          </StyledButton>
-
-          <StyledButton
-            variant="outlined"
-            color="primary"
-            fullWidth
-            sx={{ mt: 2 }}
-            onClick={handleAzureSSO}
-          >
-            使用 Azure SSO 登入
-          </StyledButton>
-
-          <StyledButton
-            variant="outlined"
-            color="secondary"
-            fullWidth
-            sx={{ mt: 2 }}
-            onClick={playGame}
-            startIcon={<Casino />}
-          >
-            比大小登入
-          </StyledButton>
-
-          {showGameInput && (
-        <Box display="flex" paddingTop={2} gap={2} alignItems="center">
-          <TextField
             
-            label="輸入一個數字 (1-10)"
-            type="number"
-            variant="outlined"
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: '#4caf50', // ✅ 邊框顏色
+            <TextField
+              label="帳號"
+              variant="outlined"
+              margin="normal"
+              fullWidth
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <AccountCircle color="primary" />
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <TextField
+              label="密碼"
+              type={showPassword ? 'text' : 'password'}
+              variant="outlined"
+              margin="normal"
+              fullWidth
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Lock color="primary" />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            
+            {loginError && (
+              <Typography variant="body2" color="error" align="center" sx={{ mt: 1 }}>
+                {loginError}
+              </Typography>
+            )}
+
+            <StyledButton
+              variant="contained"
+              color="primary"
+              fullWidth
+              sx={{ mt: 3 }}
+              onClick={handleLogin}
+            >
+              登入系統
+            </StyledButton>
+
+            <StyledButton
+              variant="outlined"
+              color="primary"
+              fullWidth
+              sx={{ mt: 2 }}
+              onClick={handleAzureSSO}
+            >
+              使用 Azure SSO 登入
+            </StyledButton>
+
+            <StyledButton
+              variant="outlined"
+              color="secondary"
+              fullWidth
+              sx={{ mt: 2 }}
+              onClick={playGame}
+              startIcon={<Casino />}
+            >
+              比大小登入
+            </StyledButton>
+
+            {showGameInput && (
+          <Box display="flex" paddingTop={2} gap={2} alignItems="center">
+            <TextField
+              
+              label="輸入一個數字 (1-10)"
+              type="number"
+              variant="outlined"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: '#4caf50', // ✅ 邊框顏色
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#4caf50', // ✅ 滑鼠移上去
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#1b5e20', // ✅ 聚焦時
+                  },
                 },
-                '&:hover fieldset': {
-                  borderColor: '#4caf50', // ✅ 滑鼠移上去
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: '#1b5e20', // ✅ 聚焦時
-                },
-              },
-            }}
-            fullWidth
-            value={userNumber !== null ? userNumber : ''}
-            onChange={(e) => setUserNumber(Number(e.target.value))}
-          />
-          <StyledButton
-            variant="outlined"
-            color="secondary"
-            onClick={handlePK}
-            sx={{ height: '56px' }} // 跟 TextField 高度一致
-          >
-            PK
-          </StyledButton>
-        </Box>
+              }}
+              fullWidth
+              value={userNumber !== null ? userNumber : ''}
+              onChange={(e) => setUserNumber(Number(e.target.value))}
+            />
+            <StyledButton
+              variant="outlined"
+              color="secondary"
+              onClick={handlePK}
+              sx={{ height: '56px' }} // 跟 TextField 高度一致
+            >
+              PK
+            </StyledButton>
+          </Box>
 )}
 
-          {gameResult && (
-            <Typography 
-              variant="body1" 
-              align="center" 
-              sx={{ 
-                mt: 2, 
-                p: 2, 
-                bgcolor: 'rgba(46, 125, 50, 0.1)',
-                borderRadius: 1,
-                color: '#2e7d32'
-              }}
-            >
-              {gameResult}
-            </Typography>
-          )}
+            {gameResult && (
+              <Typography 
+                variant="body1" 
+                align="center" 
+                sx={{ 
+                  mt: 2, 
+                  p: 2, 
+                  bgcolor: 'rgba(46, 125, 50, 0.1)',
+                  borderRadius: 1,
+                  color: '#2e7d32'
+                }}
+              >
+                {gameResult}
+              </Typography>
+            )}
 
-          <Box mt={3} textAlign="center">
-            <Link href="#" variant="body2" sx={{ color: '#2e7d32' }}>
-              忘記密碼？
-            </Link>
-          </Box>
-        </FormSection>
-      </LoginBox>
-    </LoginContainer>
+            <Box mt={3} textAlign="center">
+              <Link href="#" variant="body2" sx={{ color: '#2e7d32' }}>
+                忘記密碼？
+              </Link>
+            </Box>
+          </FormSection>
+        </LoginBox>
+      </LoginContainer>
+    </>
   );
 };
 

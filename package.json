@@ -7,8 +7,11 @@
     "node": ">=20.0.0"
   },
   "dependencies": {
+    "@dotlottie/player-component": "^2.7.12",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@lottiefiles/dotlottie-react": "^0.13.3",
+    "@lottiefiles/dotlottie-wc": "^0.5.1",
     "@mui/icons-material": "^5.17.1",
     "@mui/material": "^5.17.1",
     "@mui/x-date-pickers": "^6.20.2",
@@ -24,6 +27,7 @@
     "axios": "^1.8.4",
     "date-fns": "^2.30.0",
     "framer-motion": "^12.6.3",
+    "lottie-react": "^2.4.1",
     "mdb-react-ui-kit": "^9.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
