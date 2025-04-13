@@ -543,6 +543,12 @@ const StepperForm: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    if (formData) {
+      handleFormDataChange(formData);
+    }
+  }, [formData, handleFormDataChange]);
+
   return (
     <Box sx={{ p: 1 }}>
       {/* 麵包屑導航 */}

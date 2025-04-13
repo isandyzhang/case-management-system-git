@@ -19,7 +19,6 @@ import {
   ArrowBack,
   KeyboardArrowRight,
   KeyboardArrowLeft,
-  Padding,
 } from '@mui/icons-material';
 import { useNavigate, useParams, Link as RouterLink } from 'react-router-dom';
 import CaseForm from './case-form/CaseForm';

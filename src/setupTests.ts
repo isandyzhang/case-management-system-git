@@ -3,6 +3,17 @@
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
+import { expect, afterEach } from 'vitest';
+import { cleanup } from '@testing-library/react';
+import matchers from '@testing-library/jest-dom/matchers';
+
+// 扩展 expect 匹配器
+expect.extend(matchers);
+
+// 在每个测试后清理
+afterEach(() => {
+  cleanup();
+});
 
 // 模拟 ResizeObserver
 class ResizeObserver {

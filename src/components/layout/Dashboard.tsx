@@ -25,6 +25,8 @@ import {
   ResponsiveContainer,
   LineChart,
   Line,
+  Area,
+  AreaChart
 } from 'recharts';
 import {
   Home,

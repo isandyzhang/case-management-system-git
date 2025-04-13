@@ -54,15 +54,10 @@ const EmotionalAssessment: React.FC<EmotionalAssessmentProps> = ({ formData, onF
 
   // 計算總分
   useEffect(() => {
-    if (formData.eqAnswers) {
-const totalScore = Object.values(formData.eqAnswers)
-        .map(value => Number(value))
-        .reduce((acc, curr) => acc + curr, 0);      onFormDataChange({
-        ...formData,
-        eqTotalScore: totalScore,
-      });
+    if (formData) {
+      onFormDataChange(formData);
     }
-  }, [formData.eqAnswers]);
+  }, [formData, onFormDataChange]);
 
   const getScoreInterpretation = (score: number) => {
     if (score <= 10) return '情緒穩定';
